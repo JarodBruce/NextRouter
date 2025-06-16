@@ -1,225 +1,338 @@
 #!/bin/bash
 
-# nftablesの設定スクリプト
-# 使用方法: ./nftables-setup.sh [WAN_INTERFACE] [LAN_INTERFACE]
-# 例: ./nftables-setup.sh eth0 eth1
+# Simple Router Setup Script
+# IPv4 NAPT Only (For Experiments)
+# Usage: sudo ./nftables-setup.sh [WAN_INTERFACE] [LAN_INTERFACE]
+# Example: sudo ./nftables-setup.sh enxc8a362d31ba2 enp1s0
 
-# === インターフェース設定 ===
-# コマンドライン引数があれば使用、なければデフォルト値
-WAN_INTERFACE="${1:-ens18}"     # WAN (外部ネットワーク) - デフォルト: ens18
-LAN_INTERFACE="${2:-ens19}"     # LAN (内部ネットワーク) - デフォルト: ens19
+# === Interface Settings ===
+# Use command line arguments if provided, otherwise use default values
+WAN_INTERFACE="${1:-enxc8a362d31ba2}"     # WAN (external network)
+LAN_INTERFACE="${2:-enp1s0}"              # LAN (internal network)
 
-# === ネットワーク設定 ===
-LAN_IPV4_NETWORK="10.40.0.0/24"        # LANのIPv4ネットワーク
-LAN_IPV4_GATEWAY="10.40.0.1/24"        # LANのIPv4ゲートウェイ
-LAN_IPV6_NETWORK="fd00:40::/64"         # LANのIPv6ネットワーク
-LAN_IPV6_GATEWAY="fd00:40::1/64"        # LANのIPv6ゲートウェイ
-DHCP_IPV4_START="10.40.0.100"          # DHCP IPv4開始アドレス
-DHCP_IPV4_END="10.40.0.200"            # DHCP IPv4終了アドレス
-DHCP_IPV6_START="fd00:40::100"         # DHCP IPv6開始アドレス
-DHCP_IPV6_END="fd00:40::200"           # DHCP IPv6終了アドレス
+# === Network Settings ===
+LAN_IPV4_NETWORK="10.40.0.0/24"        # LAN IPv4 network
+LAN_IPV4_GATEWAY="10.40.0.1/24"        # LAN IPv4 gateway
+# IPv6 is dynamically set by DHCP-PD (Prefix Delegation)
+DHCP_IPV4_START="10.40.0.100"          # DHCP IPv4 start address
+DHCP_IPV4_END="10.40.0.200"            # DHCP IPv4 end address
 
-echo "=== nftables設定スクリプト ==="
+echo "=== Simple Router Setup Script (IPv4 Only) ==="
+echo "Execution time: $(date)"
 echo "WAN Interface: $WAN_INTERFACE"
 echo "LAN Interface: $LAN_INTERFACE"
 echo "LAN IPv4: $LAN_IPV4_NETWORK (Gateway: ${LAN_IPV4_GATEWAY%/*})"
-echo "LAN IPv6: $LAN_IPV6_NETWORK (Gateway: ${LAN_IPV6_GATEWAY%/*})"
+echo "DNS: 1.1.1.1 (Cloudflare)"
 echo ""
 
-# インターフェースの存在確認
+# === Permission Check ===
+if [ "$EUID" -ne 0 ]; then
+    echo "Error: This script must be run with root privileges"
+    echo "Usage: sudo $0 [WAN_INTERFACE] [LAN_INTERFACE]"
+    exit 1
+fi
+
+# Interface existence check
 if ! ip link show "$WAN_INTERFACE" &>/dev/null; then
-    echo "エラー: WAN interface '$WAN_INTERFACE' が見つかりません"
-    echo "利用可能なインターフェース:"
-    ip link show | grep -E '^[0-9]+:' | awk -F': ' '{print "  " $2}' | sed 's/@.*//'
+    echo "Error: WAN interface '$WAN_INTERFACE' not found"
+    echo "Available interfaces:"
+    ip link show | grep -E '^[0-9]+:' | awk -F': ' '{print "  " $2}' | sed 's/@.*//' 
     exit 1
 fi
 
 if ! ip link show "$LAN_INTERFACE" &>/dev/null; then
-    echo "エラー: LAN interface '$LAN_INTERFACE' が見つかりません"
-    echo "利用可能なインターフェース:"
-    ip link show | grep -E '^[0-9]+:' | awk -F': ' '{print "  " $2}' | sed 's/@.*//'
+    echo "Error: LAN interface '$LAN_INTERFACE' not found"
+    echo "Available interfaces:"
+    ip link show | grep -E '^[0-9]+:' | awk -F': ' '{print "  " $2}' | sed 's/@.*//' 
     exit 1
 fi
 
-if ! command -v nftables &> /dev/null; then
+echo "Step 1: Installing required packages..."
+# Install required packages
+echo "  - nftables..."
+if ! command -v nft &> /dev/null; then
     apt update && apt install -y nftables
 fi
 
-# dnsmasqをインストール（DHCPv6サーバー用）
+echo "  - dnsmasq (DHCPv4 server)..."
 if ! command -v dnsmasq &> /dev/null; then
     apt update && apt install -y dnsmasq
 fi
 
-# 既存のルールをクリア
-nft flush ruleset
+# Stop and disable unnecessary services
+echo "  - Stopping unnecessary IPv6 services..."
+systemctl stop wide-dhcpv6-client 2>/dev/null || true
+systemctl disable wide-dhcpv6-client 2>/dev/null || true
+systemctl stop radvd 2>/dev/null || true
+systemctl disable radvd 2>/dev/null || true
 
-# LANインターフェースにIPアドレスを設定
-# まず既存のIPアドレスをクリア
+# Remove IPv6 bridge if exists
+IPV6_BRIDGE="br-ipv6"
+if ip link show "$IPV6_BRIDGE" &>/dev/null; then
+    echo "  - Removing existing IPv6 bridge..."
+    ip link set dev "$IPV6_BRIDGE" down 2>/dev/null || true
+    brctl delbr "$IPV6_BRIDGE" 2>/dev/null || true
+fi
+
+echo ""
+echo "Step 2: Configuring network interfaces..."
+# Stop existing services
+echo "  Stopping existing services..."
+systemctl stop dnsmasq 2>/dev/null || true
+
+# Configure LAN interface with IPv4 address
+echo "  Configuring LAN interface ($LAN_INTERFACE)..."
+# Clear existing IP addresses
 ip addr flush dev "$LAN_INTERFACE" 2>/dev/null || true
 ip addr add "$LAN_IPV4_GATEWAY" dev "$LAN_INTERFACE"
-# IPv6はDHCPv6サーバー用にULA（Unique Local Address）を設定
-ip addr add "$LAN_IPV6_GATEWAY" dev "$LAN_INTERFACE"
 ip link set "$LAN_INTERFACE" up
 
-# IP転送を有効化（重要）
-echo 1 > /proc/sys/net/ipv4/ip_forward
-# IPv6転送を有効化（DHCPv6サーバー用）
-echo 1 > /proc/sys/net/ipv6/conf/all/forwarding
-# IPv6 Router Advertisementを有効化
-echo 1 > "/proc/sys/net/ipv6/conf/$LAN_INTERFACE/accept_ra"
-echo 2 > "/proc/sys/net/ipv6/conf/$LAN_INTERFACE/accept_ra_rt_info_max_plen"
+echo "  Configuring WAN interface ($WAN_INTERFACE)..."
+ip link set "$WAN_INTERFACE" up
 
-# テーブルとチェーンの作成
+echo ""
+echo "Step 3: Setting kernel parameters..."
+# Enable IP forwarding
+echo "  Enabling IPv4 forwarding..."
+echo 1 > /proc/sys/net/ipv4/ip_forward
+
+# Disable IPv6 (for experiments)
+echo "  Disabling IPv6..."
+echo 1 > /proc/sys/net/ipv6/conf/all/disable_ipv6
+echo 1 > /proc/sys/net/ipv6/conf/default/disable_ipv6
+
+# Clear existing rules
+echo "  Clearing existing nftables rules..."
+nft flush ruleset
+
+echo ""
+echo "Step 4: Configuring nftables firewall..."
+# Create tables and chains
+echo "  Creating basic tables and chains..."
 nft add table inet filter
 nft add table inet nat
 
-# フィルタテーブルのチェーン作成
+# Create filter table chains
 nft add chain inet filter input { type filter hook input priority 0\; policy drop\; }
 nft add chain inet filter forward { type filter hook forward priority 0\; policy drop\; }
 nft add chain inet filter output { type filter hook output priority 0\; policy accept\; }
 
-# NATテーブルのチェーン作成
+# Create NAT table chains
 nft add chain inet nat prerouting { type nat hook prerouting priority -100\; }
 nft add chain inet nat postrouting { type nat hook postrouting priority 100\; }
 
-# ローカルループバックを許可
+echo "  Setting up basic firewall rules..."
+
+# Allow local loopback
 nft add rule inet filter input iif lo accept
 nft add rule inet filter output oif lo accept
 
-# 確立済み・関連する接続を許可
+# Allow established and related connections
 nft add rule inet filter input ct state established,related accept
 nft add rule inet filter forward ct state established,related accept
 
-# LAN(${LAN_INTERFACE})からの入力を許可
+# Allow input from LAN
 nft add rule inet filter input iif "$LAN_INTERFACE" accept
 
-# LAN(${LAN_INTERFACE})からWAN(${WAN_INTERFACE})への転送を許可（重要）
+# Allow forwarding from LAN to WAN (important)
 nft add rule inet filter forward iif "$LAN_INTERFACE" oif "$WAN_INTERFACE" accept
-# WAN(${WAN_INTERFACE})からLAN(${LAN_INTERFACE})への応答も許可（重要）
+# Allow responses from WAN to LAN (important)
 nft add rule inet filter forward iif "$WAN_INTERFACE" oif "$LAN_INTERFACE" ct state established,related accept
-# IPv6パススルー用：IPv6トラフィックの双方向転送を許可
-nft add rule inet filter forward iif "$LAN_INTERFACE" oif "$WAN_INTERFACE" ip6 version 6 accept
-nft add rule inet filter forward iif "$WAN_INTERFACE" oif "$LAN_INTERFACE" ip6 version 6 accept
 
-# SSH接続を許可 (必要に応じて)
+# Allow SSH connections (if needed)
 nft add rule inet filter input tcp dport 22 accept
 
-# DHCP(DNSmasq等)を許可 (LANから)
+# Allow DHCP (from LAN)
 nft add rule inet filter input iif "$LAN_INTERFACE" udp dport 67 accept
 
-# DHCPv6サーバーポートを許可
-nft add rule inet filter input iif "$LAN_INTERFACE" udp dport 547 accept
-# DHCPv6クライアントポートも許可
-nft add rule inet filter input iif "$LAN_INTERFACE" udp dport 546 accept
-
-# DNS転送を許可
+# Allow DNS forwarding
 nft add rule inet filter input iif "$LAN_INTERFACE" udp dport 53 accept
 nft add rule inet filter input iif "$LAN_INTERFACE" tcp dport 53 accept
 
-# ICMP(ping)を許可
+# Allow ICMP (ping)
 nft add rule inet filter input icmp type echo-request accept
 nft add rule inet filter forward icmp type echo-request accept
 nft add rule inet filter forward icmp type echo-reply accept
 
-# ICMPv6も許可（IPv6で重要）
-nft add rule inet filter input icmpv6 type echo-request accept
-nft add rule inet filter forward icmpv6 type echo-request accept
-nft add rule inet filter forward icmpv6 type echo-reply accept
-# IPv6で必要なICMPv6メッセージを許可
-nft add rule inet filter input icmpv6 type { nd-neighbor-solicit, nd-neighbor-advert, nd-router-solicit, nd-router-advert } accept
-nft add rule inet filter forward icmpv6 type { nd-neighbor-solicit, nd-neighbor-advert, nd-router-solicit, nd-router-advert } accept
-
-# NAT設定 - LANからWANへのマスカレード（重要）
+# NAT configuration - masquerade LAN to WAN
 nft add rule inet nat postrouting oif "$WAN_INTERFACE" ip saddr "${LAN_IPV4_NETWORK}" masquerade
-# IPv6はパススルー（ブリッジ）のためNATしない
 
-# LANネットワーク用の追加設定
+# Additional LAN network settings
 nft add rule inet filter input ip saddr "${LAN_IPV4_NETWORK}" accept
 nft add rule inet filter forward ip saddr "${LAN_IPV4_NETWORK}" accept
 
-# IPv6パススルー用の設定（特定のネットワークに限定せず全IPv6を許可）
-nft add rule inet filter forward ip6 version 6 accept
-
-# LANのIPv6ネットワーク用の設定（DHCPv6用）
-nft add rule inet filter input ip6 saddr "${LAN_IPV6_NETWORK}" accept
-nft add rule inet filter forward ip6 saddr "${LAN_IPV6_NETWORK}" accept
-
-# 設定を保存
+echo "  Saving nftables configuration..."
+# Save configuration
 nft list ruleset > /etc/nftables.conf
 
-# systemd-resolvedのDNSスタブリスナーを無効化
+echo ""
+echo "Step 5: Configuring DNS..."
+# Disable systemd-resolved DNS stub listener
+echo "  Configuring systemd-resolved..."
 mkdir -p /etc/systemd/resolved.conf.d
 cat > /etc/systemd/resolved.conf.d/dns.conf << EOF
 [Resolve]
 DNSStubListener=no
 EOF
 
-# systemd-resolvedを再起動
+# Restart systemd-resolved
 systemctl restart systemd-resolved
 
-# 既存のresolv.confを削除してsystemd-resolved以外のDNSを使用
+# Update DNS configuration to use Cloudflare DNS
+echo "  Updating DNS configuration..."
 rm -f /etc/resolv.conf
 cat > /etc/resolv.conf << EOF
 nameserver 1.1.1.1
 EOF
 
-# IP転送を永続化
-echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.conf
-# IPv6転送を永続化（DHCPv6サーバー用）
-echo 'net.ipv6.conf.all.forwarding=1' >> /etc/sysctl.conf
-echo "net.ipv6.conf.$LAN_INTERFACE.accept_ra=1" >> /etc/sysctl.conf
-echo "net.ipv6.conf.$LAN_INTERFACE.accept_ra_rt_info_max_plen=2" >> /etc/sysctl.conf
+echo ""
+echo "Step 6: Making kernel parameters persistent..."
+# Backup existing sysctl configuration
+if [ ! -f /etc/sysctl.conf.backup ]; then
+    cp /etc/sysctl.conf /etc/sysctl.conf.backup
+fi
+
+# Make IP forwarding persistent
+echo "  Making IPv4 forwarding settings persistent..."
+# Remove existing settings to avoid duplicates, then add new ones
+grep -v "net.ipv4.ip_forward\|net.ipv6.conf\|net.bridge" /etc/sysctl.conf > /tmp/sysctl.conf.new
+cat >> /tmp/sysctl.conf.new << EOF
+
+# Simple Router Configuration (IPv4 Only)
+net.ipv4.ip_forward=1
+# Disable IPv6 (for experiments)
+net.ipv6.conf.all.disable_ipv6=1
+net.ipv6.conf.default.disable_ipv6=1
+EOF
+
+mv /tmp/sysctl.conf.new /etc/sysctl.conf
 sysctl -p
 
-# dnsmasqの設定ファイルを作成
+echo ""
+echo "Step 7: Configuring DHCP/DNS server (dnsmasq)..."
+# Install radvd (IPv6 Router Advertisement) if needed
+if ! command -v radvd &> /dev/null; then
+    echo "  Installing radvd (for IPv6 Router Advertisement, not used in IPv4 mode)..."
+    apt update && apt install -y radvd
+fi
+
+# Create radvd config file if WAN_PREFIX is set
+if [ -n "$WAN_PREFIX" ]; then
+    BASE_PREFIX=$(echo "$WAN_PREFIX" | cut -d: -f1-4)
+    echo "  Creating radvd config file..."
+    cat > /etc/radvd.conf << EOF
+# Router Advertisement config for IPv6 bridge
+interface $IPV6_BRIDGE {
+    AdvSendAdvert on;
+    MinRtrAdvInterval 30;
+    MaxRtrAdvInterval 600;
+    
+    prefix ${BASE_PREFIX}::/64 {
+        AdvOnLink on;
+        AdvAutonomous on;
+        AdvRouterAddr on;
+    };
+    
+    RDNSS 2001:4860:4860::8888 2001:4860:4860::8844 {
+        AdvRDNSSLifetime 600;
+    };
+};
+EOF
+    # Enable and start radvd service
+    systemctl enable radvd
+    systemctl restart radvd
+else
+    echo "  radvd will be configured later (no IPv6 address on WAN)"
+fi
+
+echo ""
+echo "Step 7: Configuring DHCP/DNS server (dnsmasq)..."
+# Create dnsmasq configuration file (IPv4 only)
+echo "  Creating dnsmasq configuration file..."
+# Backup existing configuration
+if [ -f /etc/dnsmasq.conf ] && [ ! -f /etc/dnsmasq.conf.backup ]; then
+    cp /etc/dnsmasq.conf /etc/dnsmasq.conf.backup
+fi
+
 cat > /etc/dnsmasq.conf << EOF
-# 基本設定
+# Simple Router dnsmasq Configuration (IPv4 Only)
+
+# Basic settings
 interface=$LAN_INTERFACE
 bind-interfaces
 domain-needed
 bogus-priv
 
-# DNS設定
+# DNS settings (Cloudflare)
 server=1.1.1.1
-server=8.8.8.8
-server=2606:4700:4700::1111
-server=2001:4860:4860::8888
 
-# IPv4 DHCP設定
+# IPv4 DHCP settings
 dhcp-range=$DHCP_IPV4_START,$DHCP_IPV4_END,255.255.255.0,24h
 dhcp-option=option:router,${LAN_IPV4_GATEWAY%/*}
 dhcp-option=option:dns-server,${LAN_IPV4_GATEWAY%/*}
 
-# IPv6設定
-enable-ra
-dhcp-range=$DHCP_IPV6_START,$DHCP_IPV6_END,64,24h
-dhcp-option=option6:dns-server,[${LAN_IPV6_GATEWAY%/*}]
-
-# RA (Router Advertisement) 設定
-ra-param=$LAN_INTERFACE,60,1800
-
-# ログ設定
+# Log settings
 log-dhcp
-log-queries
-
-# キャッシュサイズ
-cache-size=1000
+# Cache size
+cache-size=500
 EOF
 
-# dnsmasqサービスを有効化・開始
+echo ""
+echo "Step 8: Starting services..."
+# Enable nftables service
+echo "  Enabling nftables service..."
+systemctl enable nftables
+
+# Enable and start dnsmasq service
+echo "  Starting dnsmasq service..."
 systemctl enable dnsmasq
 systemctl restart dnsmasq
 
-echo "nftables設定が完了しました"
-echo "WAN: $WAN_INTERFACE"
-echo "LAN: $LAN_INTERFACE ($LAN_IPV4_NETWORK, $LAN_IPV6_NETWORK)"
-echo "IPv4ゲートウェイ: ${LAN_IPV4_GATEWAY%/*}"
-echo "IPv6ゲートウェイ: ${LAN_IPV6_GATEWAY%/*}"
 echo ""
-echo "DHCP設定:"
-echo "  IPv4: $DHCP_IPV4_START-$DHCP_IPV4_END"
-echo "  IPv6: $DHCP_IPV6_START-$DHCP_IPV6_END"
+echo "Step 9: Configuration completed - verification..."
+DNSMASQ_STATUS=$(systemctl is-active dnsmasq)
+NFTABLES_STATUS=$(systemctl is-active nftables)
+
+echo "=== Simple Router Setup Complete (IPv4 Only) ==="
+echo "Execution time: $(date)"
 echo ""
-echo "DNSサーバー:"
-echo "  IPv4: 1.1.1.1, 8.8.8.8"
-echo "  IPv6: 2606:4700:4700::1111, 2001:4860:4860::8888"
+echo "[Configuration Info]"
+echo "  WAN Interface: $WAN_INTERFACE"
+echo "  LAN Interface: $LAN_INTERFACE"
+echo "  IPv4 Network: $LAN_IPV4_NETWORK"
+echo "  IPv4 Gateway: ${LAN_IPV4_GATEWAY%/*}"
+echo "  IPv4 DHCP Range: $DHCP_IPV4_START - $DHCP_IPV4_END"
+echo "  DNS Server: 1.1.1.1 (Cloudflare)"
+echo ""
+echo "[Service Status]"
+echo "  nftables (Firewall): $NFTABLES_STATUS"
+echo "  dnsmasq (DHCP/DNS): $DNSMASQ_STATUS"
+echo ""
+echo "[Current Network Configuration]"
+echo "  IPv4 LAN Address:"
+ip -4 addr show dev "$LAN_INTERFACE" | grep "inet " | head -1 | awk '{print "    " $2}'
+echo "  IPv4 WAN Address:"
+WAN_IPV4_CURRENT=$(ip -4 addr show dev "$WAN_INTERFACE" | grep "inet " | head -1)
+if [ -n "$WAN_IPV4_CURRENT" ]; then
+    echo "$WAN_IPV4_CURRENT" | awk '{print "    " $2}'
+else
+    echo "    WAN IPv4 address not acquired yet"
+fi
+echo ""
+echo "[Test Commands]"
+echo "  IPv4 connectivity test: ping -c 3 8.8.8.8"
+echo "  DNS functionality test: nslookup google.com"
+echo "  Firewall check: sudo nft list ruleset"
+echo ""
+echo "[Client-side renewal methods]"
+echo "  Linux: sudo dhclient [interface]"
+echo "  Windows: ipconfig /release && ipconfig /renew"
+echo "  macOS: sudo dhclient [interface]"
+echo ""
+echo "[Configuration Files]"
+echo "  nftables: /etc/nftables.conf"
+echo "  dnsmasq: /etc/dnsmasq.conf"
+echo "  System settings: /etc/sysctl.conf"
+echo ""
+echo "[Complete] Simple IPv4 Router Setup Complete!"
+echo "   LAN clients can connect to the Internet via IPv4 NAT"
