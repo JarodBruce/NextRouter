@@ -1,0 +1,2003 @@
+{
+  "start_time": "2025-06-17T01:36:39.295955310Z",
+  "end_time": "2025-06-17T01:36:39.295955310Z",
+  "interface": "lo",
+  "total": {
+    "packet_count": 0,
+    "byte_count": 0,
+    "packets_per_second": 0.0,
+    "bytes_per_second": 0.0
+  },
+  "protocols": {},
+  "source_ips": {},
+  "destination_ips": {},
+  "ports": {}
+}
+{
+  "start_time": "2025-06-17T01:36:39.297945199Z",
+  "end_time": "2025-06-17T01:36:49.268006102Z",
+  "interface": "lo",
+  "total": {
+    "packet_count": 2686,
+    "byte_count": 588736,
+    "packets_per_second": 269.40822467402205,
+    "bytes_per_second": 59050.752256770305
+  },
+  "protocols": {
+    "TCP": {
+      "packet_count": 2686,
+      "byte_count": 588736,
+      "packets_per_second": 269.40822467402205,
+      "bytes_per_second": 59050.752256770305
+    }
+  },
+  "source_ips": {
+    "127.0.0.1": 588736
+  },
+  "destination_ips": {
+    "127.0.0.1": 588736
+  },
+  "ports": {
+    "42528": 2686,
+    "38485": 2686
+  }
+}
+{
+  "start_time": "2025-06-17T01:36:49.296961140Z",
+  "end_time": "2025-06-17T01:36:59.280848678Z",
+  "interface": "lo",
+  "total": {
+    "packet_count": 2604,
+    "byte_count": 582046,
+    "packets_per_second": 260.8434338375238,
+    "bytes_per_second": 58303.71631774015
+  },
+  "protocols": {
+    "TCP": {
+      "packet_count": 2604,
+      "byte_count": 582046,
+      "packets_per_second": 260.8434338375238,
+      "bytes_per_second": 58303.71631774015
+    }
+  },
+  "source_ips": {
+    "127.0.0.1": 582046
+  },
+  "destination_ips": {
+    "127.0.0.1": 582046
+  },
+  "ports": {
+    "42528": 2604,
+    "38485": 2604
+  }
+}
+{
+  "start_time": "2025-06-17T01:36:59.297421671Z",
+  "end_time": "2025-06-17T01:37:09.272268477Z",
+  "interface": "lo",
+  "total": {
+    "packet_count": 2962,
+    "byte_count": 533400,
+    "packets_per_second": 296.9721275315821,
+    "bytes_per_second": 53479.0455183477
+  },
+  "protocols": {
+    "TCP": {
+      "packet_count": 2962,
+      "byte_count": 533400,
+      "packets_per_second": 296.9721275315821,
+      "bytes_per_second": 53479.0455183477
+    }
+  },
+  "source_ips": {
+    "127.0.0.1": 533400
+  },
+  "destination_ips": {
+    "127.0.0.1": 533400
+  },
+  "ports": {
+    "42528": 2962,
+    "38485": 2962
+  }
+}
+{
+  "start_time": "2025-06-17T01:38:02.685887256Z",
+  "end_time": "2025-06-17T01:38:02.685887256Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 0,
+    "byte_count": 0,
+    "packets_per_second": 0.0,
+    "bytes_per_second": 0.0
+  },
+  "protocols": {},
+  "source_ips": {},
+  "destination_ips": {},
+  "ports": {}
+}
+{
+  "start_time": "2025-06-17T01:38:02.687200260Z",
+  "end_time": "2025-06-17T01:38:12.621825644Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 8961,
+    "byte_count": 11704015,
+    "packets_per_second": 902.0535534527885,
+    "bytes_per_second": 1178177.4713106505
+  },
+  "protocols": {
+    "TCP": {
+      "packet_count": 8915,
+      "byte_count": 11699045,
+      "packets_per_second": 897.4229917455204,
+      "bytes_per_second": 1177677.1693174955
+    },
+    "UDP": {
+      "packet_count": 46,
+      "byte_count": 4970,
+      "packets_per_second": 4.630561707267969,
+      "bytes_per_second": 500.30199315482184
+    }
+  },
+  "source_ips": {
+    "10.40.0.156": 182920,
+    "104.17.107.111": 6275,
+    "219.100.92.228": 11513994,
+    "10.40.0.1": 826
+  },
+  "destination_ips": {
+    "104.17.107.111": 1402,
+    "10.40.0.156": 11521095,
+    "219.100.92.228": 181057,
+    "10.40.0.1": 461
+  },
+  "ports": {
+    "443": 19,
+    "8080": 8932,
+    "44438": 2,
+    "51517": 2,
+    "51778": 4,
+    "51816": 2215,
+    "51832": 10,
+    "51836": 41,
+    "38245": 19,
+    "51780": 20,
+    "36145": 2,
+    "51818": 2205,
+    "58234": 2,
+    "51808": 2188,
+    "51792": 2213,
+    "53": 10,
+    "44846": 19,
+    "43152": 2,
+    "37880": 17
+  }
+}
+{
+  "start_time": "2025-06-17T01:38:12.689364279Z",
+  "end_time": "2025-06-17T01:38:22.685868788Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 44559,
+    "byte_count": 54892517,
+    "packets_per_second": 4457.683073229292,
+    "bytes_per_second": 5491448.279311724
+  },
+  "protocols": {
+    "TCP": {
+      "packet_count": 44390,
+      "byte_count": 54874984,
+      "packets_per_second": 4440.776310524209,
+      "bytes_per_second": 5489694.277711084
+    },
+    "ARP": {
+      "packet_count": 2,
+      "byte_count": 84,
+      "packets_per_second": 0.2000800320128051,
+      "bytes_per_second": 8.403361344537815
+    },
+    "UDP": {
+      "packet_count": 167,
+      "byte_count": 17449,
+      "packets_per_second": 16.706682673069228,
+      "bytes_per_second": 1745.5982392957183
+    }
+  },
+  "source_ips": {
+    "10.40.0.156": 12275788,
+    "219.100.92.228": 42616645
+  },
+  "destination_ips": {
+    "10.40.0.156": 42616645,
+    "219.100.92.228": 12275788
+  },
+  "ports": {
+    "8080": 44557,
+    "51832": 4,
+    "51816": 9678,
+    "38245": 71,
+    "35038": 140,
+    "51836": 139,
+    "35026": 1815,
+    "35040": 57,
+    "51818": 9248,
+    "51808": 8449,
+    "35012": 2075,
+    "51792": 9010,
+    "34988": 1871,
+    "37880": 68,
+    "46038": 28,
+    "35002": 1904
+  }
+}
+{
+  "start_time": "2025-06-17T01:38:22.687022414Z",
+  "end_time": "2025-06-17T01:38:31.018040630Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 15891,
+    "byte_count": 21009257,
+    "packets_per_second": 1907.4540871444005,
+    "bytes_per_second": 2521816.948745649
+  },
+  "protocols": {
+    "TCP": {
+      "packet_count": 15844,
+      "byte_count": 21003928,
+      "packets_per_second": 1901.8125075021007,
+      "bytes_per_second": 2521177.2896410995
+    },
+    "UDP": {
+      "packet_count": 47,
+      "byte_count": 5329,
+      "packets_per_second": 5.6415796422998445,
+      "bytes_per_second": 639.6591045492738
+    }
+  },
+  "source_ips": {
+    "10.40.0.156": 20562461,
+    "219.100.92.228": 441320,
+    "151.101.2.219": 5040,
+    "10.40.0.1": 436
+  },
+  "destination_ips": {
+    "151.101.2.219": 10213,
+    "10.40.0.156": 446796,
+    "219.100.92.228": 20552064,
+    "10.40.0.1": 184
+  },
+  "ports": {
+    "443": 27,
+    "8080": 15860,
+    "39650": 2,
+    "35038": 258,
+    "60743": 2,
+    "35026": 4351,
+    "35040": 77,
+    "59450": 27,
+    "35012": 4400,
+    "53": 4,
+    "34988": 3260,
+    "46038": 43,
+    "35002": 3471
+  }
+}
+{
+  "start_time": "2025-06-17T01:38:32.687023977Z",
+  "end_time": "2025-06-17T01:38:32.687023977Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 0,
+    "byte_count": 0,
+    "packets_per_second": 0.0,
+    "bytes_per_second": 0.0
+  },
+  "protocols": {},
+  "source_ips": {},
+  "destination_ips": {},
+  "ports": {}
+}
+{
+  "start_time": "2025-06-17T01:38:42.687828612Z",
+  "end_time": "2025-06-17T01:38:42.687828612Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 0,
+    "byte_count": 0,
+    "packets_per_second": 0.0,
+    "bytes_per_second": 0.0
+  },
+  "protocols": {},
+  "source_ips": {},
+  "destination_ips": {},
+  "ports": {}
+}
+{
+  "start_time": "2025-06-17T01:38:52.687558299Z",
+  "end_time": "2025-06-17T01:38:52.687558299Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 0,
+    "byte_count": 0,
+    "packets_per_second": 0.0,
+    "bytes_per_second": 0.0
+  },
+  "protocols": {},
+  "source_ips": {},
+  "destination_ips": {},
+  "ports": {}
+}
+{
+  "start_time": "2025-06-17T01:39:02.687338397Z",
+  "end_time": "2025-06-17T01:39:02.687338397Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 0,
+    "byte_count": 0,
+    "packets_per_second": 0.0,
+    "bytes_per_second": 0.0
+  },
+  "protocols": {},
+  "source_ips": {},
+  "destination_ips": {},
+  "ports": {}
+}
+{
+  "start_time": "2025-06-17T01:39:12.686939937Z",
+  "end_time": "2025-06-17T01:39:12.686939937Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 0,
+    "byte_count": 0,
+    "packets_per_second": 0.0,
+    "bytes_per_second": 0.0
+  },
+  "protocols": {},
+  "source_ips": {},
+  "destination_ips": {},
+  "ports": {}
+}
+{
+  "start_time": "2025-06-17T01:39:22.687093611Z",
+  "end_time": "2025-06-17T01:39:22.687093611Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 0,
+    "byte_count": 0,
+    "packets_per_second": 0.0,
+    "bytes_per_second": 0.0
+  },
+  "protocols": {},
+  "source_ips": {},
+  "destination_ips": {},
+  "ports": {}
+}
+{
+  "start_time": "2025-06-17T01:39:32.687203376Z",
+  "end_time": "2025-06-17T01:39:32.687203376Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 0,
+    "byte_count": 0,
+    "packets_per_second": 0.0,
+    "bytes_per_second": 0.0
+  },
+  "protocols": {},
+  "source_ips": {},
+  "destination_ips": {},
+  "ports": {}
+}
+{
+  "start_time": "2025-06-17T01:39:42.688013950Z",
+  "end_time": "2025-06-17T01:39:42.688013950Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 0,
+    "byte_count": 0,
+    "packets_per_second": 0.0,
+    "bytes_per_second": 0.0
+  },
+  "protocols": {},
+  "source_ips": {},
+  "destination_ips": {},
+  "ports": {}
+}
+{
+  "start_time": "2025-06-17T01:39:52.687308541Z",
+  "end_time": "2025-06-17T01:39:52.687308541Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 0,
+    "byte_count": 0,
+    "packets_per_second": 0.0,
+    "bytes_per_second": 0.0
+  },
+  "protocols": {},
+  "source_ips": {},
+  "destination_ips": {},
+  "ports": {}
+}
+{
+  "start_time": "2025-06-17T01:40:02.687470116Z",
+  "end_time": "2025-06-17T01:40:02.687470116Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 0,
+    "byte_count": 0,
+    "packets_per_second": 0.0,
+    "bytes_per_second": 0.0
+  },
+  "protocols": {},
+  "source_ips": {},
+  "destination_ips": {},
+  "ports": {}
+}
+{
+  "start_time": "2025-06-17T03:00:53.818448545Z",
+  "end_time": "2025-06-17T03:00:53.818448545Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 0,
+    "byte_count": 0,
+    "packets_per_second": 0.0,
+    "bytes_per_second": 0.0
+  },
+  "protocols": {},
+  "source_ips": {},
+  "destination_ips": {},
+  "ports": {}
+}
+{
+  "start_time": "2025-06-17T03:01:25.186227684Z",
+  "end_time": "2025-06-17T03:01:25.186227684Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 0,
+    "byte_count": 0,
+    "packets_per_second": 0.0,
+    "bytes_per_second": 0.0
+  },
+  "protocols": {},
+  "source_ips": {},
+  "destination_ips": {},
+  "ports": {}
+}
+{
+  "start_time": "2025-06-17T03:01:25.187552841Z",
+  "end_time": "2025-06-17T03:01:35.184884885Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 13682,
+    "byte_count": 20068030,
+    "packets_per_second": 1368.6105831749526,
+    "bytes_per_second": 2007405.2215664699
+  },
+  "protocols": {
+    "UDP": {
+      "packet_count": 58,
+      "byte_count": 6235,
+      "packets_per_second": 5.801740522156647,
+      "bytes_per_second": 623.6871061318395
+    },
+    "TCP": {
+      "packet_count": 13624,
+      "byte_count": 20061795,
+      "packets_per_second": 1362.8088426527959,
+      "bytes_per_second": 2006781.534460338
+    }
+  },
+  "source_ips": {
+    "10.40.0.156": 284993,
+    "104.17.106.111": 6275,
+    "10.40.0.1": 826,
+    "219.100.92.228": 19775936
+  },
+  "destination_ips": {
+    "10.40.0.156": 19783037,
+    "104.17.106.111": 1402,
+    "10.40.0.1": 461,
+    "219.100.92.228": 283130
+  },
+  "ports": {
+    "43074": 3337,
+    "43106": 56,
+    "43044": 20,
+    "33273": 2,
+    "43080": 3373,
+    "56089": 24,
+    "443": 19,
+    "43092": 10,
+    "8080": 13653,
+    "43054": 3109,
+    "43952": 19,
+    "33274": 2,
+    "59904": 24,
+    "56903": 2,
+    "37137": 2,
+    "43068": 3696,
+    "52594": 2,
+    "43034": 4,
+    "53": 10
+  }
+}
+{
+  "start_time": "2025-06-17T03:01:35.188144795Z",
+  "end_time": "2025-06-17T03:01:45.185226538Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 91395,
+    "byte_count": 130639819,
+    "packets_per_second": 9142.24267280184,
+    "bytes_per_second": 13067902.270681204
+  },
+  "protocols": {
+    "ARP": {
+      "packet_count": 2,
+      "byte_count": 84,
+      "packets_per_second": 0.20006001800540163,
+      "bytes_per_second": 8.402520756226869
+    },
+    "UDP": {
+      "packet_count": 293,
+      "byte_count": 30758,
+      "packets_per_second": 29.30879263779134,
+      "bytes_per_second": 3076.7230169050717
+    },
+    "TCP": {
+      "packet_count": 91100,
+      "byte_count": 130608977,
+      "packets_per_second": 9112.733820146044,
+      "bytes_per_second": 13064817.145143542
+    }
+  },
+  "source_ips": {
+    "10.40.0.156": 33353007,
+    "219.100.92.228": 97286728
+  },
+  "destination_ips": {
+    "10.40.0.156": 97286728,
+    "219.100.92.228": 33353007
+  },
+  "ports": {
+    "43074": 18290,
+    "56089": 113,
+    "43080": 18094,
+    "34710": 120,
+    "34698": 4846,
+    "34718": 321,
+    "43092": 4,
+    "8080": 91393,
+    "34674": 5915,
+    "34686": 5046,
+    "43054": 14183,
+    "59904": 113,
+    "43068": 18796,
+    "34678": 5257,
+    "43106": 228,
+    "34805": 67
+  }
+}
+{
+  "start_time": "2025-06-17T03:01:45.187398076Z",
+  "end_time": "2025-06-17T03:01:46.729201138Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 4686,
+    "byte_count": 4845701,
+    "packets_per_second": 3040.8825438027256,
+    "bytes_per_second": 3144517.196625568
+  },
+  "protocols": {
+    "UDP": {
+      "packet_count": 11,
+      "byte_count": 1383,
+      "packets_per_second": 7.138221933809215,
+      "bytes_per_second": 897.4691758598314
+    },
+    "TCP": {
+      "packet_count": 4675,
+      "byte_count": 4844318,
+      "packets_per_second": 3033.7443218689164,
+      "bytes_per_second": 3143619.727449708
+    }
+  },
+  "source_ips": {
+    "151.101.194.219": 5040,
+    "10.40.0.156": 4715730,
+    "219.100.92.228": 124495,
+    "10.40.0.1": 436
+  },
+  "destination_ips": {
+    "151.101.194.219": 8645,
+    "10.40.0.156": 129971,
+    "10.40.0.1": 184,
+    "219.100.92.228": 4706901
+  },
+  "ports": {
+    "53": 4,
+    "34718": 57,
+    "42596": 2,
+    "34710": 13,
+    "34698": 1305,
+    "59921": 2,
+    "443": 27,
+    "8080": 4655,
+    "34674": 1170,
+    "34686": 687,
+    "56728": 27,
+    "34678": 1416,
+    "34805": 7
+  }
+}
+{
+  "start_time": "2025-06-17T03:02:42.448465606Z",
+  "end_time": "2025-06-17T03:02:42.448465606Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 0,
+    "byte_count": 0,
+    "packets_per_second": 0.0,
+    "bytes_per_second": 0.0
+  },
+  "protocols": {},
+  "source_ips": {},
+  "destination_ips": {},
+  "ports": {}
+}
+{
+  "start_time": "2025-06-17T03:02:42.449792803Z",
+  "end_time": "2025-06-17T03:02:51.930142503Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 75299,
+    "byte_count": 106435277,
+    "packets_per_second": 7942.932489451477,
+    "bytes_per_second": 11227349.894514767
+  },
+  "protocols": {
+    "TCP": {
+      "packet_count": 75045,
+      "byte_count": 106409238,
+      "packets_per_second": 7916.139240506329,
+      "bytes_per_second": 11224603.164556962
+    },
+    "UDP": {
+      "packet_count": 252,
+      "byte_count": 25955,
+      "packets_per_second": 26.582278481012658,
+      "bytes_per_second": 2737.869198312236
+    },
+    "ARP": {
+      "packet_count": 2,
+      "byte_count": 84,
+      "packets_per_second": 0.21097046413502107,
+      "bytes_per_second": 8.860759493670885
+    }
+  },
+  "source_ips": {
+    "104.17.106.111": 6840,
+    "219.100.92.228": 104875645,
+    "10.40.0.156": 1552515,
+    "10.40.0.1": 193
+  },
+  "destination_ips": {
+    "10.40.0.1": 107,
+    "104.17.106.111": 1534,
+    "10.40.0.156": 104882678,
+    "219.100.92.228": 1550874
+  },
+  "ports": {
+    "60893": 125,
+    "60178": 4,
+    "443": 23,
+    "60186": 20,
+    "60234": 17340,
+    "60240": 260,
+    "8080": 75272,
+    "58632": 23,
+    "60224": 21834,
+    "52727": 2,
+    "52390": 125,
+    "53": 2,
+    "60210": 16953,
+    "60198": 10,
+    "60236": 18601
+  }
+}
+{
+  "start_time": "2025-06-17T03:02:52.450238836Z",
+  "end_time": "2025-06-17T03:02:57.763811919Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 26593,
+    "byte_count": 37782267,
+    "packets_per_second": 5005.270092226614,
+    "bytes_per_second": 7111286.843591192
+  },
+  "protocols": {
+    "TCP": {
+      "packet_count": 26516,
+      "byte_count": 37773773,
+      "packets_per_second": 4990.777338603426,
+      "bytes_per_second": 7109688.123470733
+    },
+    "UDP": {
+      "packet_count": 77,
+      "byte_count": 8494,
+      "packets_per_second": 14.492753623188406,
+      "bytes_per_second": 1598.720120459251
+    }
+  },
+  "source_ips": {
+    "151.101.130.219": 5106,
+    "219.100.92.228": 697122,
+    "10.40.0.156": 37079603,
+    "10.40.0.1": 436
+  },
+  "destination_ips": {
+    "151.101.130.219": 8591,
+    "10.40.0.1": 184,
+    "10.40.0.156": 702664,
+    "219.100.92.228": 37070828
+  },
+  "ports": {
+    "443": 29,
+    "59278": 29,
+    "54222": 7198,
+    "54234": 5105,
+    "8080": 26560,
+    "54252": 138,
+    "54206": 6710,
+    "54248": 380,
+    "57736": 2,
+    "53": 4,
+    "54204": 6952,
+    "60198": 4,
+    "52795": 73,
+    "39068": 2
+  }
+}
+{
+  "start_time": "2025-06-17T03:03:02.450148276Z",
+  "end_time": "2025-06-17T03:03:02.450148276Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 0,
+    "byte_count": 0,
+    "packets_per_second": 0.0,
+    "bytes_per_second": 0.0
+  },
+  "protocols": {},
+  "source_ips": {},
+  "destination_ips": {},
+  "ports": {}
+}
+{
+  "start_time": "2025-06-17T03:03:12.450562979Z",
+  "end_time": "2025-06-17T03:03:12.450562979Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 0,
+    "byte_count": 0,
+    "packets_per_second": 0.0,
+    "bytes_per_second": 0.0
+  },
+  "protocols": {},
+  "source_ips": {},
+  "destination_ips": {},
+  "ports": {}
+}
+{
+  "start_time": "2025-06-17T03:03:22.450092582Z",
+  "end_time": "2025-06-17T03:03:22.450092582Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 0,
+    "byte_count": 0,
+    "packets_per_second": 0.0,
+    "bytes_per_second": 0.0
+  },
+  "protocols": {},
+  "source_ips": {},
+  "destination_ips": {},
+  "ports": {}
+}
+{
+  "start_time": "2025-06-17T03:03:37.163463216Z",
+  "end_time": "2025-06-17T03:03:37.163463216Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 0,
+    "byte_count": 0,
+    "packets_per_second": 0.0,
+    "bytes_per_second": 0.0
+  },
+  "protocols": {},
+  "source_ips": {},
+  "destination_ips": {},
+  "ports": {}
+}
+{
+  "start_time": "2025-06-17T03:03:37.164922495Z",
+  "end_time": "2025-06-17T03:03:47.164337514Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 31564,
+    "byte_count": 47570826,
+    "packets_per_second": 3156.7156715671567,
+    "bytes_per_second": 4757558.355835583
+  },
+  "protocols": {
+    "UDP": {
+      "packet_count": 117,
+      "byte_count": 12236,
+      "packets_per_second": 11.701170117011701,
+      "bytes_per_second": 1223.7223722372237
+    },
+    "TCP": {
+      "packet_count": 31447,
+      "byte_count": 47558590,
+      "packets_per_second": 3145.014501450145,
+      "bytes_per_second": 4756334.633463346
+    }
+  },
+  "source_ips": {
+    "10.40.0.1": 360,
+    "104.17.106.111": 6275,
+    "219.100.92.228": 46877788,
+    "10.40.0.156": 686403
+  },
+  "destination_ips": {
+    "10.40.0.156": 46884423,
+    "10.40.0.1": 195,
+    "219.100.92.228": 684806,
+    "104.17.106.111": 1402
+  },
+  "ports": {
+    "56190": 19,
+    "36247": 2,
+    "53": 4,
+    "56704": 56,
+    "443": 19,
+    "48984": 4,
+    "49018": 7846,
+    "49058": 7113,
+    "41581": 2,
+    "49034": 7705,
+    "8080": 31541,
+    "49004": 10,
+    "49046": 8609,
+    "48988": 20,
+    "59450": 57,
+    "49052": 121
+  }
+}
+{
+  "start_time": "2025-06-17T03:03:47.164458986Z",
+  "end_time": "2025-06-17T03:03:57.155966169Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 88431,
+    "byte_count": 132890458,
+    "packets_per_second": 8851.065959363428,
+    "bytes_per_second": 13301016.71504354
+  },
+  "protocols": {
+    "UDP": {
+      "packet_count": 299,
+      "byte_count": 31422,
+      "packets_per_second": 29.926934240816735,
+      "bytes_per_second": 3145.0305274747275
+    },
+    "TCP": {
+      "packet_count": 88130,
+      "byte_count": 132858952,
+      "packets_per_second": 8820.938844960465,
+      "bytes_per_second": 13297863.276949255
+    },
+    "ARP": {
+      "packet_count": 2,
+      "byte_count": 84,
+      "packets_per_second": 0.20018016214593135,
+      "bytes_per_second": 8.407566810129117
+    }
+  },
+  "source_ips": {
+    "219.100.92.228": 102084922,
+    "10.40.0.156": 30805452
+  },
+  "destination_ips": {
+    "10.40.0.156": 102084922,
+    "219.100.92.228": 30805452
+  },
+  "ports": {
+    "59134": 4154,
+    "56704": 119,
+    "42927": 62,
+    "49034": 16419,
+    "49018": 16952,
+    "49058": 15174,
+    "59110": 5103,
+    "59146": 112,
+    "8080": 88429,
+    "49004": 4,
+    "49046": 19534,
+    "59450": 118,
+    "59118": 6094,
+    "59142": 294,
+    "49052": 239,
+    "59130": 4051
+  }
+}
+{
+  "start_time": "2025-06-17T03:03:57.165295864Z",
+  "end_time": "2025-06-17T03:04:07.161202681Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 6648,
+    "byte_count": 7794978,
+    "packets_per_second": 665.1325662831416,
+    "bytes_per_second": 779887.743871936
+  },
+  "protocols": {
+    "UDP": {
+      "packet_count": 20,
+      "byte_count": 2431,
+      "packets_per_second": 2.001000500250125,
+      "bytes_per_second": 243.22161080540272
+    },
+    "TCP": {
+      "packet_count": 6628,
+      "byte_count": 7792547,
+      "packets_per_second": 663.1315657828915,
+      "bytes_per_second": 779644.5222611306
+    }
+  },
+  "source_ips": {
+    "104.17.107.111": 6774,
+    "219.100.92.228": 690392,
+    "10.40.0.1": 629,
+    "10.40.0.156": 7092077,
+    "151.101.130.219": 5106
+  },
+  "destination_ips": {
+    "151.101.130.219": 9127,
+    "10.40.0.156": 702901,
+    "219.100.92.228": 7081191,
+    "10.40.0.1": 291,
+    "104.17.107.111": 1468
+  },
+  "ports": {
+    "59134": 1241,
+    "59255": 2,
+    "53": 6,
+    "51276": 75,
+    "51290": 9,
+    "53621": 2,
+    "51226": 4,
+    "42927": 11,
+    "51252": 93,
+    "443": 50,
+    "38667": 2,
+    "59110": 1373,
+    "59146": 26,
+    "50246": 1,
+    "51306": 78,
+    "8080": 6592,
+    "47206": 29,
+    "51232": 20,
+    "52576": 2,
+    "59118": 2208,
+    "34444": 21,
+    "51240": 9,
+    "59142": 84,
+    "51262": 125,
+    "59130": 1233
+  }
+}
+{
+  "start_time": "2025-06-17T03:04:07.164460996Z",
+  "end_time": "2025-06-17T03:04:17.161053245Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 85303,
+    "byte_count": 128779218,
+    "packets_per_second": 8533.713485394157,
+    "bytes_per_second": 12883075.030012004
+  },
+  "protocols": {
+    "UDP": {
+      "packet_count": 290,
+      "byte_count": 30285,
+      "packets_per_second": 29.011604641856742,
+      "bytes_per_second": 3029.7118847539014
+    },
+    "TCP": {
+      "packet_count": 85013,
+      "byte_count": 128748933,
+      "packets_per_second": 8504.7018807523,
+      "bytes_per_second": 12880045.31812725
+    }
+  },
+  "source_ips": {
+    "219.100.92.228": 93608071,
+    "10.40.0.156": 35171147
+  },
+  "destination_ips": {
+    "10.40.0.156": 93608071,
+    "219.100.92.228": 35171147
+  },
+  "ports": {
+    "51276": 15478,
+    "51290": 223,
+    "38667": 109,
+    "51252": 12780,
+    "50246": 110,
+    "51324": 5531,
+    "51306": 16436,
+    "8080": 85303,
+    "51342": 5709,
+    "43730": 71,
+    "51374": 122,
+    "51240": 5,
+    "51314": 6633,
+    "51340": 4588,
+    "51262": 17170,
+    "51358": 338
+  }
+}
+{
+  "start_time": "2025-06-17T03:04:17.165387531Z",
+  "end_time": "2025-06-17T03:04:22.372781642Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 3481,
+    "byte_count": 3060604,
+    "packets_per_second": 668.5231419243327,
+    "bytes_per_second": 587786.4413289803
+  },
+  "protocols": {
+    "UDP": {
+      "packet_count": 4,
+      "byte_count": 526,
+      "packets_per_second": 0.7681966583445362,
+      "bytes_per_second": 101.01786057230652
+    },
+    "TCP": {
+      "packet_count": 3475,
+      "byte_count": 3059994,
+      "packets_per_second": 667.3708469368158,
+      "bytes_per_second": 587669.2913385826
+    },
+    "ARP": {
+      "packet_count": 2,
+      "byte_count": 84,
+      "packets_per_second": 0.3840983291722681,
+      "bytes_per_second": 16.13212982523526
+    }
+  },
+  "source_ips": {
+    "219.100.92.228": 91857,
+    "10.40.0.1": 210,
+    "151.101.194.219": 5040,
+    "10.40.0.156": 2963413
+  },
+  "destination_ips": {
+    "151.101.194.219": 8277,
+    "10.40.0.156": 97107,
+    "219.100.92.228": 2955038,
+    "10.40.0.1": 98
+  },
+  "ports": {
+    "53": 2,
+    "46180": 27,
+    "42359": 2,
+    "443": 27,
+    "51324": 953,
+    "8080": 3450,
+    "51342": 865,
+    "43730": 2,
+    "51374": 12,
+    "51314": 983,
+    "51358": 42,
+    "51340": 593
+  }
+}
+{
+  "start_time": "2025-06-17T03:04:27.165343748Z",
+  "end_time": "2025-06-17T03:04:27.165343748Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 0,
+    "byte_count": 0,
+    "packets_per_second": 0.0,
+    "bytes_per_second": 0.0
+  },
+  "protocols": {},
+  "source_ips": {},
+  "destination_ips": {},
+  "ports": {}
+}
+{
+  "start_time": "2025-06-17T03:04:37.165304941Z",
+  "end_time": "2025-06-17T03:04:37.165304941Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 0,
+    "byte_count": 0,
+    "packets_per_second": 0.0,
+    "bytes_per_second": 0.0
+  },
+  "protocols": {},
+  "source_ips": {},
+  "destination_ips": {},
+  "ports": {}
+}
+{
+  "start_time": "2025-06-17T03:04:47.164957847Z",
+  "end_time": "2025-06-17T03:04:47.164957847Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 0,
+    "byte_count": 0,
+    "packets_per_second": 0.0,
+    "bytes_per_second": 0.0
+  },
+  "protocols": {},
+  "source_ips": {},
+  "destination_ips": {},
+  "ports": {}
+}
+{
+  "start_time": "2025-06-17T03:04:57.165162986Z",
+  "end_time": "2025-06-17T03:04:57.165162986Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 0,
+    "byte_count": 0,
+    "packets_per_second": 0.0,
+    "bytes_per_second": 0.0
+  },
+  "protocols": {},
+  "source_ips": {},
+  "destination_ips": {},
+  "ports": {}
+}
+{
+  "start_time": "2025-06-17T03:05:07.164717099Z",
+  "end_time": "2025-06-17T03:05:07.164717099Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 0,
+    "byte_count": 0,
+    "packets_per_second": 0.0,
+    "bytes_per_second": 0.0
+  },
+  "protocols": {},
+  "source_ips": {},
+  "destination_ips": {},
+  "ports": {}
+}
+{
+  "start_time": "2025-06-17T03:05:17.165422821Z",
+  "end_time": "2025-06-17T03:05:17.165422821Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 0,
+    "byte_count": 0,
+    "packets_per_second": 0.0,
+    "bytes_per_second": 0.0
+  },
+  "protocols": {},
+  "source_ips": {},
+  "destination_ips": {},
+  "ports": {}
+}
+{
+  "start_time": "2025-06-17T03:05:27.165064565Z",
+  "end_time": "2025-06-17T03:05:27.165064565Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 0,
+    "byte_count": 0,
+    "packets_per_second": 0.0,
+    "bytes_per_second": 0.0
+  },
+  "protocols": {},
+  "source_ips": {},
+  "destination_ips": {},
+  "ports": {}
+}
+{
+  "start_time": "2025-06-17T03:05:37.164591375Z",
+  "end_time": "2025-06-17T03:05:37.164591375Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 0,
+    "byte_count": 0,
+    "packets_per_second": 0.0,
+    "bytes_per_second": 0.0
+  },
+  "protocols": {},
+  "source_ips": {},
+  "destination_ips": {},
+  "ports": {}
+}
+{
+  "start_time": "2025-06-17T03:05:47.164285892Z",
+  "end_time": "2025-06-17T03:05:47.164285892Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 0,
+    "byte_count": 0,
+    "packets_per_second": 0.0,
+    "bytes_per_second": 0.0
+  },
+  "protocols": {},
+  "source_ips": {},
+  "destination_ips": {},
+  "ports": {}
+}
+{
+  "start_time": "2025-06-17T03:05:57.164847966Z",
+  "end_time": "2025-06-17T03:05:57.164847966Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 0,
+    "byte_count": 0,
+    "packets_per_second": 0.0,
+    "bytes_per_second": 0.0
+  },
+  "protocols": {},
+  "source_ips": {},
+  "destination_ips": {},
+  "ports": {}
+}
+{
+  "start_time": "2025-06-17T03:06:07.164607664Z",
+  "end_time": "2025-06-17T03:06:07.164607664Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 0,
+    "byte_count": 0,
+    "packets_per_second": 0.0,
+    "bytes_per_second": 0.0
+  },
+  "protocols": {},
+  "source_ips": {},
+  "destination_ips": {},
+  "ports": {}
+}
+{
+  "start_time": "2025-06-17T03:06:17.164993883Z",
+  "end_time": "2025-06-17T03:06:17.164993883Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 0,
+    "byte_count": 0,
+    "packets_per_second": 0.0,
+    "bytes_per_second": 0.0
+  },
+  "protocols": {},
+  "source_ips": {},
+  "destination_ips": {},
+  "ports": {}
+}
+{
+  "start_time": "2025-06-17T03:06:27.164853938Z",
+  "end_time": "2025-06-17T03:06:27.164853938Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 0,
+    "byte_count": 0,
+    "packets_per_second": 0.0,
+    "bytes_per_second": 0.0
+  },
+  "protocols": {},
+  "source_ips": {},
+  "destination_ips": {},
+  "ports": {}
+}
+{
+  "start_time": "2025-06-17T03:06:37.165303912Z",
+  "end_time": "2025-06-17T03:06:37.165303912Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 0,
+    "byte_count": 0,
+    "packets_per_second": 0.0,
+    "bytes_per_second": 0.0
+  },
+  "protocols": {},
+  "source_ips": {},
+  "destination_ips": {},
+  "ports": {}
+}
+{
+  "start_time": "2025-06-17T03:06:47.165345793Z",
+  "end_time": "2025-06-17T03:06:47.165345793Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 0,
+    "byte_count": 0,
+    "packets_per_second": 0.0,
+    "bytes_per_second": 0.0
+  },
+  "protocols": {},
+  "source_ips": {},
+  "destination_ips": {},
+  "ports": {}
+}
+{
+  "start_time": "2025-06-17T03:06:57.164807042Z",
+  "end_time": "2025-06-17T03:06:57.164807042Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 0,
+    "byte_count": 0,
+    "packets_per_second": 0.0,
+    "bytes_per_second": 0.0
+  },
+  "protocols": {},
+  "source_ips": {},
+  "destination_ips": {},
+  "ports": {}
+}
+{
+  "start_time": "2025-06-17T03:07:07.164632232Z",
+  "end_time": "2025-06-17T03:07:07.164632232Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 0,
+    "byte_count": 0,
+    "packets_per_second": 0.0,
+    "bytes_per_second": 0.0
+  },
+  "protocols": {},
+  "source_ips": {},
+  "destination_ips": {},
+  "ports": {}
+}
+{
+  "start_time": "2025-06-17T03:07:17.165307814Z",
+  "end_time": "2025-06-17T03:07:17.165307814Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 0,
+    "byte_count": 0,
+    "packets_per_second": 0.0,
+    "bytes_per_second": 0.0
+  },
+  "protocols": {},
+  "source_ips": {},
+  "destination_ips": {},
+  "ports": {}
+}
+{
+  "start_time": "2025-06-17T03:07:27.165359454Z",
+  "end_time": "2025-06-17T03:07:27.165359454Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 0,
+    "byte_count": 0,
+    "packets_per_second": 0.0,
+    "bytes_per_second": 0.0
+  },
+  "protocols": {},
+  "source_ips": {},
+  "destination_ips": {},
+  "ports": {}
+}
+{
+  "start_time": "2025-06-17T03:07:37.164362479Z",
+  "end_time": "2025-06-17T03:07:47.162530706Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 46477,
+    "byte_count": 62014169,
+    "packets_per_second": 4648.629725945189,
+    "bytes_per_second": 6202657.431486297
+  },
+  "protocols": {
+    "UDP": {
+      "packet_count": 156,
+      "byte_count": 16306,
+      "packets_per_second": 15.603120624124825,
+      "bytes_per_second": 1630.9261852370475
+    },
+    "TCP": {
+      "packet_count": 46321,
+      "byte_count": 61997863,
+      "packets_per_second": 4633.026605321064,
+      "bytes_per_second": 6201026.505301061
+    }
+  },
+  "source_ips": {
+    "10.40.0.1": 499,
+    "104.17.106.111": 6275,
+    "219.100.92.228": 61084845,
+    "10.40.0.156": 922550
+  },
+  "destination_ips": {
+    "10.40.0.156": 61091619,
+    "10.40.0.1": 302,
+    "219.100.92.228": 920846,
+    "104.17.106.111": 1402
+  },
+  "ports": {
+    "45216": 20,
+    "45270": 158,
+    "57929": 2,
+    "53": 6,
+    "46871": 2,
+    "45240": 10,
+    "45252": 10516,
+    "443": 19,
+    "45202": 4,
+    "8080": 46452,
+    "52154": 19,
+    "45232": 11386,
+    "53340": 75,
+    "45218": 12160,
+    "59755": 75,
+    "41254": 2,
+    "45260": 12048
+  }
+}
+{
+  "start_time": "2025-06-17T03:07:47.164744046Z",
+  "end_time": "2025-06-17T03:07:56.597481140Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 66493,
+    "byte_count": 91786000,
+    "packets_per_second": 7049.724342663274,
+    "bytes_per_second": 9731340.1187447
+  },
+  "protocols": {
+    "UDP": {
+      "packet_count": 206,
+      "byte_count": 22002,
+      "packets_per_second": 21.840542832909243,
+      "bytes_per_second": 2332.6972010178115
+    },
+    "TCP": {
+      "packet_count": 66285,
+      "byte_count": 91763914,
+      "packets_per_second": 7027.67175572519,
+      "bytes_per_second": 9728998.515691264
+    },
+    "ARP": {
+      "packet_count": 2,
+      "byte_count": 84,
+      "packets_per_second": 0.21204410517387615,
+      "bytes_per_second": 8.905852417302798
+    }
+  },
+  "source_ips": {
+    "219.100.92.228": 54935746,
+    "10.40.0.1": 436,
+    "151.101.66.219": 5106,
+    "10.40.0.156": 36844628
+  },
+  "destination_ips": {
+    "10.40.0.156": 54941288,
+    "219.100.92.228": 36835737,
+    "10.40.0.1": 184,
+    "151.101.66.219": 8707
+  },
+  "ports": {
+    "45270": 130,
+    "45240": 4,
+    "38138": 5175,
+    "45252": 8866,
+    "38128": 8448,
+    "53": 4,
+    "38158": 4794,
+    "443": 29,
+    "58464": 74,
+    "8080": 66458,
+    "53340": 64,
+    "45232": 10205,
+    "57496": 2,
+    "38130": 5955,
+    "45218": 9947,
+    "39910": 29,
+    "38150": 137,
+    "59755": 64,
+    "45260": 12216,
+    "38168": 379,
+    "58233": 2
+  }
+}
+{
+  "start_time": "2025-06-17T03:07:57.165536672Z",
+  "end_time": "2025-06-17T03:08:07.161754768Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 85559,
+    "byte_count": 128538871,
+    "packets_per_second": 8559.323729491796,
+    "bytes_per_second": 12859030.712284913
+  },
+  "protocols": {
+    "UDP": {
+      "packet_count": 293,
+      "byte_count": 30347,
+      "packets_per_second": 29.31172468987595,
+      "bytes_per_second": 3035.9143657462982
+    },
+    "TCP": {
+      "packet_count": 85266,
+      "byte_count": 128508524,
+      "packets_per_second": 8530.01200480192,
+      "bytes_per_second": 12855994.797919167
+    }
+  },
+  "source_ips": {
+    "104.17.107.111": 6841,
+    "10.40.0.1": 193,
+    "219.100.92.228": 110910593,
+    "10.40.0.156": 17621244
+  },
+  "destination_ips": {
+    "10.40.0.156": 110917627,
+    "10.40.0.1": 107,
+    "104.17.107.111": 1534,
+    "219.100.92.228": 17619603
+  },
+  "ports": {
+    "52036": 14,
+    "38593": 128,
+    "52012": 18298,
+    "53": 2,
+    "57328": 23,
+    "52056": 2270,
+    "52074": 166,
+    "52024": 17881,
+    "52032": 17934,
+    "52072": 2135,
+    "443": 23,
+    "52008": 20141,
+    "52092": 2313,
+    "52044": 268,
+    "52104": 66,
+    "8080": 85534,
+    "56527": 129,
+    "50271": 2,
+    "52002": 20,
+    "51986": 4,
+    "56507": 34,
+    "52062": 3733
+  }
+}
+{
+  "start_time": "2025-06-17T03:08:07.165029596Z",
+  "end_time": "2025-06-17T03:08:17.160934105Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 77418,
+    "byte_count": 110541041,
+    "packets_per_second": 7745.67283641821,
+    "bytes_per_second": 11059633.91695848
+  },
+  "protocols": {
+    "UDP": {
+      "packet_count": 248,
+      "byte_count": 25929,
+      "packets_per_second": 24.812406203101553,
+      "bytes_per_second": 2594.197098549275
+    },
+    "TCP": {
+      "packet_count": 77170,
+      "byte_count": 110515112,
+      "packets_per_second": 7720.860430215108,
+      "bytes_per_second": 11057039.719859932
+    }
+  },
+  "source_ips": {
+    "104.17.107.111": 6275,
+    "219.100.92.228": 88777384,
+    "151.101.66.219": 5106,
+    "10.40.0.1": 193,
+    "10.40.0.156": 21752083
+  },
+  "destination_ips": {
+    "10.40.0.156": 88788958,
+    "219.100.92.228": 21742031,
+    "10.40.0.1": 107,
+    "151.101.66.219": 8543,
+    "104.17.107.111": 1402
+  },
+  "ports": {
+    "52056": 3833,
+    "52072": 3162,
+    "53": 2,
+    "52074": 213,
+    "43256": 19,
+    "50814": 15635,
+    "50824": 14382,
+    "54000": 29,
+    "50838": 17351,
+    "52092": 3235,
+    "443": 48,
+    "50806": 215,
+    "57434": 104,
+    "52104": 69,
+    "44563": 103,
+    "8080": 77368,
+    "50792": 20,
+    "50804": 10,
+    "50780": 4,
+    "43287": 2,
+    "50848": 14083,
+    "56507": 39,
+    "52062": 4910
+  }
+}
+{
+  "start_time": "2025-06-17T03:08:17.165315439Z",
+  "end_time": "2025-06-17T03:08:26.719719537Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 52209,
+    "byte_count": 75926923,
+    "packets_per_second": 5464.6221477915005,
+    "bytes_per_second": 7947134.4986393135
+  },
+  "protocols": {
+    "UDP": {
+      "packet_count": 165,
+      "byte_count": 17784,
+      "packets_per_second": 17.270253297048356,
+      "bytes_per_second": 1861.419300816412
+    },
+    "TCP": {
+      "packet_count": 52044,
+      "byte_count": 75909139,
+      "packets_per_second": 5447.351894494453,
+      "bytes_per_second": 7945273.079338497
+    }
+  },
+  "source_ips": {
+    "219.100.92.228": 38580043,
+    "10.40.0.1": 632,
+    "151.101.66.219": 4974,
+    "10.40.0.156": 37336224,
+    "104.17.106.111": 5050
+  },
+  "destination_ips": {
+    "10.40.0.156": 38590699,
+    "219.100.92.228": 37325984,
+    "10.40.0.1": 291,
+    "151.101.66.219": 8679,
+    "104.17.106.111": 1270
+  },
+  "ports": {
+    "43925": 73,
+    "50824": 6509,
+    "50814": 6782,
+    "53506": 2,
+    "53": 6,
+    "50838": 7047,
+    "46522": 5632,
+    "443": 41,
+    "50806": 89,
+    "46534": 5434,
+    "57434": 43,
+    "46544": 137,
+    "46514": 380,
+    "44563": 43,
+    "8080": 52162,
+    "46540": 4815,
+    "34328": 25,
+    "33478": 16,
+    "50804": 4,
+    "38750": 2,
+    "50848": 6115,
+    "48668": 2,
+    "46510": 9059
+  }
+}
+{
+  "start_time": "2025-06-17T03:08:27.165127579Z",
+  "end_time": "2025-06-17T03:08:37.161716014Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 100639,
+    "byte_count": 148566801,
+    "packets_per_second": 10067.927170868346,
+    "bytes_per_second": 14862625.150060024
+  },
+  "protocols": {
+    "UDP": {
+      "packet_count": 341,
+      "byte_count": 35309,
+      "packets_per_second": 34.11364545818327,
+      "bytes_per_second": 3532.312925170068
+    },
+    "TCP": {
+      "packet_count": 100298,
+      "byte_count": 148531492,
+      "packets_per_second": 10033.813525410163,
+      "bytes_per_second": 14859092.837134853
+    }
+  },
+  "source_ips": {
+    "219.100.92.228": 139979264,
+    "104.17.106.111": 1790,
+    "10.40.0.156": 8585747
+  },
+  "destination_ips": {
+    "10.40.0.156": 139981054,
+    "219.100.92.228": 8585549,
+    "104.17.106.111": 198
+  },
+  "ports": {
+    "47452": 22985,
+    "443": 6,
+    "47420": 20,
+    "47462": 23128,
+    "47506": 884,
+    "33478": 6,
+    "47424": 14,
+    "47438": 23762,
+    "8080": 100633,
+    "38523": 163,
+    "47486": 913,
+    "37136": 163,
+    "47530": 76,
+    "47536": 32,
+    "47482": 25802,
+    "47468": 336,
+    "47502": 847,
+    "47514": 1489,
+    "47406": 4,
+    "41071": 15
+  }
+}
+{
+  "start_time": "2025-06-17T03:08:37.164908711Z",
+  "end_time": "2025-06-17T03:08:47.156539749Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 75086,
+    "byte_count": 106016700,
+    "packets_per_second": 7515.3638274447,
+    "bytes_per_second": 10611220.09808828
+  },
+  "protocols": {
+    "UDP": {
+      "packet_count": 241,
+      "byte_count": 25304,
+      "packets_per_second": 24.121709538584728,
+      "bytes_per_second": 2532.6794114703234
+    },
+    "TCP": {
+      "packet_count": 74843,
+      "byte_count": 105991312,
+      "packets_per_second": 7491.04193774397,
+      "bytes_per_second": 10608679.011109998
+    },
+    "ARP": {
+      "packet_count": 2,
+      "byte_count": 84,
+      "packets_per_second": 0.20018016214593135,
+      "bytes_per_second": 8.407566810129117
+    }
+  },
+  "source_ips": {
+    "219.100.92.228": 74168523,
+    "10.40.0.1": 355,
+    "151.101.2.219": 4974,
+    "10.40.0.156": 31835990,
+    "104.17.106.111": 6774
+  },
+  "destination_ips": {
+    "10.40.0.156": 74180626,
+    "219.100.92.228": 31825506,
+    "10.40.0.1": 205,
+    "151.101.2.219": 8811,
+    "104.17.106.111": 1468
+  },
+  "ports": {
+    "45216": 12410,
+    "52827": 2,
+    "53": 4,
+    "45226": 15285,
+    "45194": 20,
+    "55668": 89,
+    "443": 46,
+    "41071": 58,
+    "55295": 90,
+    "47506": 4705,
+    "45222": 11124,
+    "8080": 75034,
+    "47530": 305,
+    "47486": 4797,
+    "42690": 21,
+    "45190": 4,
+    "47536": 103,
+    "45196": 10,
+    "45204": 13502,
+    "47502": 4592,
+    "47514": 7753,
+    "39982": 2,
+    "45220": 187,
+    "51798": 25
+  }
+}
+{
+  "start_time": "2025-06-17T03:08:47.164765107Z",
+  "end_time": "2025-06-17T03:08:56.300192455Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 61419,
+    "byte_count": 87133326,
+    "packets_per_second": 6723.481116584565,
+    "bytes_per_second": 9538404.597701149
+  },
+  "protocols": {
+    "UDP": {
+      "packet_count": 187,
+      "byte_count": 19709,
+      "packets_per_second": 20.47071702244116,
+      "bytes_per_second": 2157.5259989053093
+    },
+    "TCP": {
+      "packet_count": 61232,
+      "byte_count": 87113617,
+      "packets_per_second": 6703.010399562124,
+      "bytes_per_second": 9536247.071702244
+    }
+  },
+  "source_ips": {
+    "219.100.92.228": 48757055,
+    "151.101.2.219": 5040,
+    "10.40.0.156": 38371231
+  },
+  "destination_ips": {
+    "10.40.0.156": 48762095,
+    "219.100.92.228": 38362534,
+    "151.101.2.219": 8697
+  },
+  "ports": {
+    "45216": 7092,
+    "60436": 27,
+    "52306": 4624,
+    "52332": 135,
+    "45226": 11321,
+    "55668": 57,
+    "443": 27,
+    "55295": 57,
+    "45222": 6365,
+    "45669": 73,
+    "52326": 5897,
+    "8080": 61392,
+    "45204": 9320,
+    "45220": 117,
+    "45196": 4,
+    "52298": 9910,
+    "52304": 381,
+    "52318": 6039
+  }
+}
+{
+  "start_time": "2025-06-17T03:08:57.164448696Z",
+  "end_time": "2025-06-17T03:09:07.025664026Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 113966,
+    "byte_count": 159551302,
+    "packets_per_second": 11557.24571544468,
+    "bytes_per_second": 16180032.653889056
+  },
+  "protocols": {
+    "UDP": {
+      "packet_count": 375,
+      "byte_count": 39064,
+      "packets_per_second": 38.028597505324,
+      "bytes_per_second": 3961.464354527938
+    },
+    "TCP": {
+      "packet_count": 113591,
+      "byte_count": 159512238,
+      "packets_per_second": 11519.217117939357,
+      "bytes_per_second": 16176071.189534528
+    }
+  },
+  "source_ips": {
+    "10.40.0.1": 193,
+    "104.17.106.111": 6774,
+    "219.100.92.228": 157191462,
+    "10.40.0.156": 2352873
+  },
+  "destination_ips": {
+    "10.40.0.156": 157198429,
+    "10.40.0.1": 107,
+    "219.100.92.228": 2351298,
+    "104.17.106.111": 1468
+  },
+  "ports": {
+    "59740": 32461,
+    "53": 2,
+    "59734": 10,
+    "443": 21,
+    "59704": 4,
+    "8080": 113943,
+    "59748": 29585,
+    "59720": 20,
+    "57763": 186,
+    "59756": 25226,
+    "58484": 187,
+    "59760": 384,
+    "59768": 25880,
+    "44938": 21,
+    "53947": 2
+  }
+}
+{
+  "start_time": "2025-06-17T03:09:07.164859020Z",
+  "end_time": "2025-06-17T03:09:17.156480573Z",
+  "interface": "ens19",
+  "total": {
+    "packet_count": 58383,
+    "byte_count": 83128847,
+    "packets_per_second": 5843.5592032829545,
+    "bytes_per_second": 8320373.035732159
+  },
+  "protocols": {
+    "UDP": {
+      "packet_count": 185,
+      "byte_count": 19539,
+      "packets_per_second": 18.516664998498648,
+      "bytes_per_second": 1955.6600940846763
+    },
+    "TCP": {
+      "packet_count": 58198,
+      "byte_count": 83109308,
+      "packets_per_second": 5825.042538284456,
+      "bytes_per_second": 8318417.375638074
+    }
+  },
+  "source_ips": {
+    "104.17.107.111": 6275,
+    "219.100.92.228": 46137156,
+    "151.101.66.219": 5106,
+    "10.40.0.1": 193,
+    "10.40.0.156": 36980117
+  },
+  "destination_ips": {
+    "10.40.0.156": 46148730,
+    "219.100.92.228": 36969353,
+    "10.40.0.1": 107,
+    "151.101.66.219": 9255,
+    "104.17.107.111": 1402
+  },
+  "ports": {
+    "53114": 20,
+    "53126": 8055,
+    "53074": 6070,
+    "59104": 73,
+    "53": 2,
+    "53150": 8332,
+    "53090": 380,
+    "59734": 4,
+    "43479": 2,
+    "443": 48,
+    "53120": 7589,
+    "53134": 10,
+    "45689": 55,
+    "53044": 6397,
+    "8080": 58333,
+    "57514": 29,
+    "53066": 6477,
+    "53060": 6420,
+    "51753": 55,
+    "53094": 136,
+    "53158": 118,
+    "53152": 8138,
+    "49330": 19,
+    "53098": 4
+  }
+}

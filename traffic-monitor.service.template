@@ -1,0 +1,51 @@
+# Network Traffic Monitor Service Template
+# このファイルは systemd サービスとして traffic monitor を実行するためのテンプレートです
+
+[Unit]
+Description=Network Traffic Monitor for %i interface
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+ExecStart=/path/to/NextRouter/target/release/network-traffic-monitor -i %i -o /var/log/traffic-%i.json -s 60 -v
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+# セキュリティ設定
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/log
+PrivateTmp=true
+
+# 必要な権限
+AmbientCapabilities=CAP_NET_RAW CAP_NET_ADMIN
+CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN
+
+[Install]
+WantedBy=multi-user.target
+
+# 使用方法:
+# 1. このファイルを /etc/systemd/system/traffic-monitor@.service にコピー
+# 2. ExecStart のパスを実際のバイナリパスに変更
+# 3. サービスを有効化・開始:
+#    sudo systemctl daemon-reload
+#    sudo systemctl enable traffic-monitor@ens19.service
+#    sudo systemctl start traffic-monitor@ens19.service
+#
+# 複数インターフェースの監視:
+#    sudo systemctl enable traffic-monitor@ens18.service
+#    sudo systemctl enable traffic-monitor@ens19.service
+#    sudo systemctl start traffic-monitor@ens18.service
+#    sudo systemctl start traffic-monitor@ens19.service
+#
+# ログの確認:
+#    sudo journalctl -u traffic-monitor@ens19.service -f
+#
+# 統計ファイルの確認:
+#    sudo tail -f /var/log/traffic-ens19.json
