@@ -185,10 +185,6 @@ INFO - Output file: traffic_stats.json
 INFO - Statistics interval: 60 seconds
 INFO - === Traffic Statistics ===
 INFO - Interface: ens19 | Duration: 60.0s | Total: 15234 packets, 12.46 MB | Rate: 254 packets/s, 212.67 KB/s
-INFO -   TCP: 12891 packets, 11.23 MB (187.18 KB/s)
-INFO -   UDP: 2134 packets, 1.03 MB (17.54 KB/s)
-INFO -   ICMP: 156 packets, 156.79 KB (2.61 KB/s)
-INFO -   ARP: 53 packets, 30.87 KB (514 B/s)
 INFO -   Top Source IPs:
 INFO -     192.168.1.100 - 5.68 MB
 INFO -     192.168.1.101 - 3.46 MB
@@ -202,48 +198,6 @@ INFO -     80 - 8756 packets
 INFO -     443 - 6543 packets
 INFO -     53 - 2341 packets
 INFO - Statistics saved to: traffic_stats.json
-```
-
-#### JSON Output
-```json
-{
-  "start_time": "2025-06-17T10:30:00Z",
-  "end_time": "2025-06-17T10:31:00Z",
-  "interface": "ens19",
-  "total": {
-    "packet_count": 15234,
-    "byte_count": 12456789,
-    "packets_per_second": 254.0,
-    "bytes_per_second": 207613.15
-  },
-  "protocols": {
-    "TCP": {
-      "packet_count": 12891,
-      "byte_count": 11234567,
-      "packets_per_second": 214.85,
-      "bytes_per_second": 187242.78
-    },
-    "UDP": {
-      "packet_count": 2134,
-      "byte_count": 1034567,
-      "packets_per_second": 35.57,
-      "bytes_per_second": 17242.78
-    }
-  },
-  "source_ips": {
-    "192.168.1.100": 5678912,
-    "192.168.1.101": 3456789
-  },
-  "destination_ips": {
-    "8.8.8.8": 2345678,
-    "1.1.1.1": 1234567
-  },
-  "ports": {
-    "80": 8756,
-    "443": 6543,
-    "53": 2341
-  }
-}
 ```
 
 ## 🔄 Integration with nftables Router
@@ -290,7 +244,7 @@ jq '.source_ips | to_entries | sort_by(.value) | reverse | .[0:5]' traffic_stats
 # Calculate average packets per second
 jq '.total.packets_per_second' traffic_stats.json | awk '{sum+=$1; count++} END {print sum/count}'
 ```
-
+j
 ### Troubleshooting
 
 ### Traffic Monitor Issues
