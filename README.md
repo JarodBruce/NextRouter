@@ -1,12 +1,6 @@
-<<<<<<< HEAD
 # Simple Linux Router Setup (IPv4 Only) + Network Traffic Monitor
 
 A lightweight Linux router setup script for experimental use, providing IPv4 NAT, DHCP, and DNS services using nftables and dnsmasq, plus a Rust-based network traffic monitoring tool.
-=======
-# Simple Linux Router Setup (IPv4 Only)
-
-A lightweight Linux router setup script for experimental use, providing IPv4 NAT, DHCP, and DNS services using nftables and dnsmasq.
->>>>>>> 7fcadab0b699fe94d2d205ca5e8fcab4680db766
 
 ## 📋 Overview
 
@@ -17,10 +11,7 @@ This repository contains scripts to transform a Linux machine into a simple IPv4
 - **DNS Forwarding** - Route DNS queries through Cloudflare DNS (1.1.1.1)
 - **Firewall (nftables)** - Secure packet filtering and forwarding rules
 - **IPv6 Disabled** - Simplified configuration for experimental use
-<<<<<<< HEAD
 - **Network Traffic Monitor** - Real-time packet capture and analysis tool written in Rust
-=======
->>>>>>> 7fcadab0b699fe94d2d205ca5e8fcab4680db766
 
 ## 🚀 Quick Start
 
@@ -29,14 +20,30 @@ This repository contains scripts to transform a Linux machine into a simple IPv4
 - Linux system with root access (tested on Ubuntu/Debian)
 - Two network interfaces (one for WAN, one for LAN)
 - Internet connection on WAN interface
-<<<<<<< HEAD
 - Rust (for building the traffic monitor)
 
-### Router Setup
-=======
+### Quick Test (Traffic Monitor Only)
 
-### Basic Usage
->>>>>>> 7fcadab0b699fe94d2d205ca5e8fcab4680db766
+If you just want to test the network traffic monitor:
+
+```bash
+# Navigate to the traffic monitor directory
+cd rust-network-sum
+
+# Quick syntax check (no root required)
+./test-monitor.sh --syntax-only
+
+# Full test with packet capture (requires root)
+sudo ./test-monitor.sh
+
+# Check available interfaces
+ip link show
+
+# Start monitoring (example with ens19)
+sudo ./target/release/network-traffic-monitor -i ens19 -v
+```
+
+### Router Setup
 
 1. **Make the script executable:**
    ```bash
@@ -53,21 +60,39 @@ This repository contains scripts to transform a Linux machine into a simple IPv4
    sudo ./nftables-setup.sh [WAN_INTERFACE] [LAN_INTERFACE]
    ```
 
-<<<<<<< HEAD
 ### Traffic Monitor Setup
 
-1. **Build the traffic monitor:**
+1. **Navigate to the project directory:**
+   ```bash
+   cd rust-network-sum
+   ```
+
+2. **Build and install the traffic monitor:**
    ```bash
    chmod +x setup-monitor.sh
    sudo ./setup-monitor.sh
    ```
 
-2. **Monitor ens19 interface:**
+3. **Test the installation:**
    ```bash
+   chmod +x test-monitor.sh
+   # Syntax check only (no root required)
+   ./test-monitor.sh --syntax-only
+   
+   # Full test (requires root)
+   sudo ./test-monitor.sh
+   ```
+
+4. **Monitor network interface:**
+   ```bash
+   # Check available interfaces
+   ip link show
+   
+   # Start monitoring (replace ens19 with your interface)
    sudo ./target/release/network-traffic-monitor -i ens19 -v
    ```
 
-3. **Monitor with custom settings:**
+5. **Monitor with custom settings:**
    ```bash
    sudo ./target/release/network-traffic-monitor -i ens19 -s 30 -o ens19_traffic.json
    ```
@@ -98,11 +123,48 @@ sudo ./target/release/network-traffic-monitor -i ens19 -o lan_traffic.json &
 
 # Monitor loopback interface for testing
 sudo ./target/release/network-traffic-monitor -i lo -s 10 -v
+
+# Test available interfaces first
+ip link show
+```
+
+### Testing and Validation
+
+The project includes a comprehensive test script to validate the traffic monitor:
+
+```bash
+# Change to traffic monitor directory
+cd rust-network-sum
+
+# Quick syntax and build test (no root required)
+./test-monitor.sh --syntax-only
+
+# Full functionality test (requires root privileges)
+sudo ./test-monitor.sh
+```
+
+**Test script features:**
+- ✓ Syntax validation and compilation check
+- ✓ Binary existence and execution verification
+- ✓ Help output validation
+- ✓ Network interface detection
+- ✓ Short-term traffic capture test (10 seconds on loopback)
+- ✓ Capabilities setting for non-root execution
+- ✓ Usage examples and interface listing
+
+**Sample test output:**
+```
+=== Network Traffic Monitor Test ===
+✓ Syntax check passed!
+✓ Build successful!
+✓ Binary found: ./target/release/network-traffic-monitor
+✓ Help output works!
+✓ Test output file created!
+✓ Root privilege test completed!
+✓ Capabilities set successfully!
 ```
 
 ### Command Line Options
-
-```
 Options:
   -i, --interface <INTERFACE>  Network interface to monitor (default: ens19)
   -o, --output <OUTPUT>        Output file for statistics (default: traffic_stats.json)
@@ -229,7 +291,7 @@ jq '.source_ips | to_entries | sort_by(.value) | reverse | .[0:5]' traffic_stats
 jq '.total.packets_per_second' traffic_stats.json | awk '{sum+=$1; count++} END {print sum/count}'
 ```
 
-## 🛠 Troubleshooting
+### Troubleshooting
 
 ### Traffic Monitor Issues
 
@@ -260,6 +322,23 @@ jq '.total.packets_per_second' traffic_stats.json | awk '{sum+=$1; count++} END 
    # Reinstall Rust if needed
    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
    source ~/.cargo/env
+   
+   # Rebuild project
+   cd rust-network-sum
+   cargo clean
+   cargo build --release
+   ```
+
+4. **Test failures:**
+   ```bash
+   # Run syntax-only test first
+   ./test-monitor.sh --syntax-only
+   
+   # Check if all dependencies are installed
+   sudo ./setup-monitor.sh
+   
+   # Try manual test
+   sudo ./target/release/network-traffic-monitor --help
    ```
 
 ### Router Setup Issues
@@ -298,12 +377,22 @@ jq '.total.packets_per_second' traffic_stats.json | awk '{sum+=$1; count++} END 
 ## 📝 Example Router Configuration
 
 ```bash
+### Example Router Configuration
+
+```bash
 # Set up router with traffic monitoring
 sudo ./nftables-setup.sh eth0 eth1
-sudo ./setup-monitor.sh eth1
+cd rust-network-sum
+sudo ./setup-monitor.sh
 
-# Start monitoring internal network
+# Test the installation
+sudo ./test-monitor.sh
+
+# Start monitoring internal network (LAN interface)
 sudo ./target/release/network-traffic-monitor -i eth1 -s 30 -o /var/log/internal_traffic.json &
+
+# Monitor external network (WAN interface) 
+sudo ./target/release/network-traffic-monitor -i eth0 -s 30 -o /var/log/external_traffic.json &
 
 # Monitor for 1 hour then analyze
 sleep 3600
@@ -311,9 +400,8 @@ pkill network-traffic-monitor
 
 # Analyze the collected data
 jq '.protocols' /var/log/internal_traffic.json | head -10
+jq '.source_ips | to_entries | sort_by(.value) | reverse | .[0:5]' /var/log/internal_traffic.json
 ```
-
-=======
 ### Example
 
 ```bash
@@ -325,8 +413,6 @@ sudo ./nftables-setup.sh enxc8a362d31ba2 enp1s0
 ```
 
 ## 🔧 Configuration Details
-
->>>>>>> 7fcadab0b699fe94d2d205ca5e8fcab4680db766
 ### Default Network Settings
 
 | Setting | Value |
