@@ -317,4 +317,26 @@ if [ -n "$WAN_IPV4_CURRENT" ]; then
     echo "$WAN_IPV4_CURRENT" | awk '{print "    " $2}'
 else
     echo "    WAN IPv4 address not acquired yet"
+<<<<<<< HEAD
 fi
+=======
+fi
+echo ""
+echo "[Test Commands]"
+echo "  IPv4 connectivity test: ping -c 3 8.8.8.8"
+echo "  DNS functionality test: nslookup google.com"
+echo "  Firewall check: sudo nft list ruleset"
+echo ""
+echo "[Client-side renewal methods]"
+echo "  Linux: sudo dhclient [interface]"
+echo "  Windows: ipconfig /release && ipconfig /renew"
+echo "  macOS: sudo dhclient [interface]"
+echo ""
+echo "[Configuration Files]"
+echo "  nftables: /etc/nftables.conf"
+echo "  dnsmasq: /etc/dnsmasq.conf"
+echo "  System settings: /etc/sysctl.conf"
+echo ""
+echo "[Complete] Simple IPv4 Router Setup Complete!"
+echo "   LAN clients can connect to the Internet via IPv4 NAT"
+>>>>>>> 7fcadab0b699fe94d2d205ca5e8fcab4680db766
