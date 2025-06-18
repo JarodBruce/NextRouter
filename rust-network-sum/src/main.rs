@@ -6,10 +6,7 @@ use capture::{start_capture_background, PacketInfo};
 use clap::Parser;
 use log::{error, info, warn};
 use pnet::datalink;
-use serde_json;
 use stats::{TrafficStatistics, format_bytes};
-use std::fs::OpenOptions;
-use std::io::Write;
 use std::net::IpAddr;
 use std::sync::mpsc;
 use std::sync::{Arc, Mutex};
@@ -78,10 +75,6 @@ struct Args {
     #[arg(short, long, default_value = "ens19")]
     interface: String,
 
-    /// Output file for statistics (default: traffic_stats.json)
-    #[arg(short, long, default_value = "traffic_stats.json")]
-    output: String,
-
     /// Statistics aggregation interval in seconds (default: 5)
     #[arg(short = 's', long, default_value = "5")]
     interval: u64,
@@ -98,41 +91,16 @@ struct Args {
 /// メイン統計管理構造体
 struct TrafficMonitor {
     stats: Arc<Mutex<TrafficStatistics>>,
-    output_file: String,
 }
 
 impl TrafficMonitor {
-    fn new(interface: String, output_file: String) -> (Self, mpsc::Receiver<PacketInfo>) {
+    fn new(interface: String) -> (Self, mpsc::Receiver<PacketInfo>) {
         let stats = Arc::new(Mutex::new(TrafficStatistics::new(interface)));
         let (_sender, receiver) = mpsc::channel();
         
         (Self {
             stats,
-            output_file,
         }, receiver)
-    }
-
-    /// 統計情報を保存
-    fn save_stats(&self) -> Result<()> {
-        let stats = {
-            let mut stats = self.stats.lock().unwrap();
-            stats.update_all_rates();
-            stats.clone()
-        };
-
-        let json = serde_json::to_string_pretty(&stats)
-            .context("Failed to serialize statistics to JSON")?;
-
-        let mut file = OpenOptions::new()
-            .create(true)
-            .append(true)
-            .open(&self.output_file)
-            .context("Failed to open output file")?;
-
-        writeln!(file, "{}", json)
-            .context("Failed to write statistics to file")?;
-
-        Ok(())
     }
 
     /// 統計をリセット
@@ -264,7 +232,6 @@ async fn main() -> Result<()> {
 
     info!("Starting network traffic monitor");
     info!("Interface: {}", args.interface);
-    info!("Output file: {}", args.output);
     info!("Statistics interval: {} seconds", args.interval);
 
     // ルート権限の確認
@@ -280,7 +247,6 @@ async fn main() -> Result<()> {
     // TrafficMonitorを作成
     let (traffic_monitor, _) = TrafficMonitor::new(
         args.interface.clone(),
-        args.output.clone(),
     );
 
     let monitor_arc = Arc::new(traffic_monitor);
