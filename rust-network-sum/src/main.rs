@@ -132,12 +132,12 @@ async fn packet_processing_task(
     monitor: Arc<TrafficMonitor>, 
     packet_receiver: mpsc::Receiver<PacketInfo>
 ) -> Result<()> {
-    let mut packet_count = 0u64;
+    let mut _packet_count = 0u64;
     
     loop {
         match packet_receiver.try_recv() {
             Ok(packet_info) => {
-                packet_count += 1;
+                _packet_count += 1;
                 monitor.record_packet(packet_info);
             }
             Err(mpsc::TryRecvError::Empty) => {
@@ -224,7 +224,7 @@ async fn main() -> Result<()> {
 
     info!("Starting network traffic monitor");
     info!("Interface: {}", args.interface);
-    info!("Statistics interval: {} seconds", args.interval);
+    info!("Statistics interval: 1 seconds");
 
     // ルート権限の確認
     if unsafe { libc::geteuid() } != 0 {
