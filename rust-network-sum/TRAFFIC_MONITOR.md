@@ -5,11 +5,12 @@ ens19インターフェース（およびその他のネットワークインタ
 ## 機能
 
 - **リアルタイムパケット監視**: 指定されたネットワークインターフェースのパケットをキャプチャ
-- **プロトコル別統計**: TCP、UDP、ICMP、その他のプロトコル別にトラフィックを集計
-- **IPアドレス統計**: 送信元・宛先IPアドレス別のトラフィック量を記録
+- **プロトコル別統計**: IPv4、IPv6、その他のプロトコル別にトラフィックを集計
+- **IPアドレス統計**: 送信元・宛先IPアドレス別のトラフィック量を記録（ローカルIPフィルタリング対応）
 - **ポート統計**: よく使用されるポート番号の統計
-- **JSON出力**: 統計データをJSON形式でファイルに保存
-- **定期的なレポート**: 指定した間隔で統計レポートを生成
+- **リアルタイム表示**: 1秒間隔でのトラフィック統計をコンソールに表示
+- **転送レート表示**: パケット/秒、バイト/秒の転送レートを自動計算
+- **非同期処理**: Tokioを使用した効率的な非同期パケット処理
 
 ## 前提条件
 
@@ -38,17 +39,14 @@ cargo build --release
 ### 基本的な使用法
 
 ```bash
-# デフォルト設定（ens19インターフェース、60秒間隔）
+# デフォルト設定（ens19インターフェース、1秒間隔で統計表示）
 sudo ./target/release/network-traffic-monitor
 
 # カスタムインターフェースを指定
 sudo ./target/release/network-traffic-monitor -i eth0
 
-# 統計出力間隔を変更（30秒間隔）
+# 統計出力間隔を変更（30秒間隔） ※現在は常に1秒間隔で表示
 sudo ./target/release/network-traffic-monitor -i ens19 -s 30
-
-# 出力ファイルを指定
-sudo ./target/release/network-traffic-monitor -i ens19 -o /var/log/traffic_stats.json
 
 # 詳細ログを有効化
 sudo ./target/release/network-traffic-monitor -i ens19 -v
@@ -59,12 +57,13 @@ sudo ./target/release/network-traffic-monitor -i ens19 -v
 ```
 Options:
   -i, --interface <INTERFACE>  Network interface to monitor (default: ens19)
-  -o, --output <OUTPUT>        Output file for statistics (default: traffic_stats.json)
-  -s, --interval <INTERVAL>    Statistics aggregation interval in seconds (default: 60)
+  -s, --interval <INTERVAL>    Statistics aggregation interval in seconds (default: 5)
   -v, --verbose               Enable verbose logging
   -h, --help                  Print help
   -V, --version               Print version
 ```
+
+## 出力例
 
 ## 出力例
 
@@ -73,136 +72,61 @@ Options:
 ```
 INFO - Starting network traffic monitor
 INFO - Interface: ens19
-INFO - Output file: traffic_stats.json
-INFO - Statistics interval: 60 seconds
-INFO - Traffic Statistics:
-INFO -   Total: 15234 packets, 12456789 bytes
-INFO -   TCP: 12891 packets, 11234567 bytes
-INFO -   UDP: 2134 packets, 1034567 bytes
-INFO -   ICMP: 156 packets, 156789 bytes
-INFO -   Other: 53 packets, 30866 bytes
-INFO - Statistics saved to: traffic_stats.json
+INFO - Statistics interval: 5 seconds
+INFO - === Traffic Statistics ===
+INFO - Last Second | Rate: 15.2 packets/s, 12.45 KB/s
+INFO -   IPv4: 148 packets, 123.45 KB (14.2 KB/s)
+INFO -   IPv6: 23 packets, 8.91 KB (1.8 KB/s)
+INFO -   Top Local Source IPs:
+INFO -     192.168.1.100 - 45.67 KB
+INFO -     10.0.0.15 - 23.45 KB
+INFO -   Top Local Destination IPs:
+INFO -     192.168.1.1 - 67.89 KB
+INFO -     10.0.0.1 - 34.56 KB
+INFO - ========================
 ```
 
-### JSON出力例
+## 機能詳細
 
-```json
-{
-  "timestamp": "2025-06-17T10:30:00Z",
-  "interface": "ens19",
-  "total_packets": 15234,
-  "total_bytes": 12456789,
-  "tcp_packets": 12891,
-  "tcp_bytes": 11234567,
-  "udp_packets": 2134,
-  "udp_bytes": 1034567,
-  "icmp_packets": 156,
-  "icmp_bytes": 156789,
-  "other_packets": 53,
-  "other_bytes": 30866,
-  "top_src_ips": [
-    ["192.168.1.100", 5678912],
-    ["192.168.1.101", 3456789],
-    ["10.0.0.50", 1234567]
-  ],
-  "top_dst_ips": [
-    ["8.8.8.8", 2345678],
-    ["1.1.1.1", 1234567],
-    ["192.168.1.1", 987654]
-  ],
-  "top_ports": [
-    [80, 8756],
-    [443, 6543],
-    [53, 2341]
-  ]
-}
-```
+### トラフィック統計
 
-## nftablesとの連携
+- **パケット数とバイト数**: 各プロトコルの詳細な統計
+- **転送レート**: パケット/秒、バイト/秒の自動計算
+- **差分計算**: 前回からの差分を基にした1秒間隔の統計
 
-このプログラムは、nftablesでNAPTを設定しているルーター環境で特に有用です。`nftables-setup.sh`で設定されたルーターの通信を監視できます。
+### IPアドレスフィルタリング
 
-### 監視対象の設定例
+プログラムは以下のローカル/プライベートIPアドレスを自動的に識別してフィルタリングします：
 
-```bash
-# WANインターフェースの監視
-sudo ./target/release/network-traffic-monitor -i enxc8a362d31ba2
+- プライベートIPアドレス（10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16）
+- ループバックアドレス（127.0.0.0/8）
+- リンクローカルアドレス（169.254.0.0/16）
+- IPv6のローカルアドレス
+- 監視対象インターフェース自身のIPアドレス
 
-# LANインターフェースの監視
-sudo ./target/release/network-traffic-monitor -i enp1s0
+### プロトコル識別
 
-# 両方のインターフェースを同時監視（別ターミナルで実行）
-sudo ./target/release/network-traffic-monitor -i enxc8a362d31ba2 -o wan_stats.json &
-sudo ./target/release/network-traffic-monitor -i enp1s0 -o lan_stats.json &
-```
-
-## systemdサービスとしての運用
-
-継続的な監視のために、systemdサービスとして設定することも可能です：
-
-```bash
-# サービスファイルの作成
-sudo tee /etc/systemd/system/traffic-monitor.service > /dev/null <<EOF
-[Unit]
-Description=Network Traffic Monitor
-After=network.target
-
-[Service]
-Type=simple
-User=root
-ExecStart=/path/to/network-traffic-monitor -i ens19 -o /var/log/traffic_stats.json
-Restart=always
-RestartSec=5
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-# サービスの有効化・開始
-sudo systemctl daemon-reload
-sudo systemctl enable traffic-monitor
-sudo systemctl start traffic-monitor
-```
-
-## ログ分析
-
-JSONログは、jqコマンドを使って簡単に分析できます：
-
-```bash
-# 最新の統計を表示
-tail -n 1 traffic_stats.json | jq .
-
-# TCP通信量の推移を表示
-jq '.tcp_bytes' traffic_stats.json
-
-# 上位送信元IPを表示
-jq '.top_src_ips' traffic_stats.json
-```
-
-## 注意事項
-
-- このプログラムは教育・実験目的で作成されています
-- 本番環境での使用前に十分なテストを行ってください
-- root権限が必要なため、セキュリティに注意してください
-- 大量のトラフィックがある環境では、ファイルサイズが急速に増大する可能性があります
+- IPv4/IPv6パケットの自動識別
+- TCP/UDP/ICMPプロトコルの詳細解析
+- ポート番号の統計（送信元・宛先両方）
 
 ## トラブルシューティング
 
-### パーミッションエラー
+### 権限エラー
 
 ```bash
-# raw socketの使用権限を確認
-sudo setcap cap_net_raw,cap_net_admin=eip ./target/release/network-traffic-monitor
-
-# または常にsudoで実行
+# プログラムを実行する際は必ずroot権限が必要
 sudo ./target/release/network-traffic-monitor
 ```
 
-### インターフェースが見つからない
+### インターフェースが見つからない場合
 
 ```bash
 # 利用可能なインターフェースを確認
 ip link show
+
+# プログラムは利用可能なインターフェースをログに出力します
+sudo ./target/release/network-traffic-monitor -i invalid_interface -v
 ```
 
 ### 依存関係エラー
@@ -210,4 +134,33 @@ ip link show
 ```bash
 # libpcap開発ライブラリの再インストール
 sudo apt install --reinstall libpcap-dev
+
+# ビルドエラーが発生した場合
+cargo clean
+cargo build --release
 ```
+
+### パフォーマンス調整
+
+- 高トラフィック環境では、統計間隔を長くすることを推奨
+- メモリ使用量を抑えるため、IP統計は上位のみ表示
+- バックグラウンド処理により、パケットドロップを最小化
+
+## 技術仕様
+
+### 依存関係
+
+- **tokio**: 非同期ランタイム
+- **pnet**: ネットワークパケット処理
+- **clap**: コマンドライン引数解析
+- **serde/serde_json**: JSON形式でのデータ構造化
+- **chrono**: 時刻処理
+- **anyhow**: エラーハンドリング
+- **log/env_logger**: ログ出力
+
+### アーキテクチャ
+
+- **パケットキャプチャ**: 専用スレッドでバックグラウンド処理
+- **統計処理**: 非同期タスクによる効率的な集計
+- **表示更新**: 1秒間隔での定期的な統計更新
+- **メモリ管理**: Arc/Mutexによる安全な共有状態管理

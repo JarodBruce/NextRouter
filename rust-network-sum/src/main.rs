@@ -75,17 +75,9 @@ struct Args {
     #[arg(short, long, default_value = "ens19")]
     interface: String,
 
-    /// Statistics aggregation interval in seconds (default: 5)
-    #[arg(short = 's', long, default_value = "5")]
-    interval: u64,
-
     /// Enable verbose logging
     #[arg(short, long)]
     verbose: bool,
-
-    /// Show real-time packet count
-    #[arg(short = 'r', long)]
-    realtime: bool,
 }
 
 /// メイン統計管理構造体
