@@ -1,3 +1,126 @@
+# 🚀 Prometheus + Rust Exporter + Grafana Monitoring Stack
+
+このプロジェクトは、RustアプリケーションからPrometheusにメトリクスを送信し、Grafanaで可視化する完全な監視スタックです。
+
+## 📋 構成要素
+
+- **Prometheus** - メトリクス収集・保存システム
+- **Grafana** - データ可視化ダッシュボード
+- **Rust Exporter** - カスタムメトリクスを生成するRustアプリケーション
+- **Network Traffic Monitor** - ネットワークトラフィック監視ツール
+- **Simple Linux Router** - IPv4ルーター設定 (実験用)
+
+## 🚀 クイックスタート
+
+### 1. システム起動
+
+```bash
+# すべてのサービスを一括起動
+./setup.sh
+```
+
+### 2. 手動での起動
+
+```bash
+cd prometheus_docker
+docker-compose up --build -d
+```
+
+## 📱 アクセス先
+
+| サービス | URL | 認証情報 |
+|---------|-----|----------|
+| Rust Exporter | http://localhost:8080 | なし |
+| Prometheus | http://localhost:9090 | なし |
+| Grafana | http://localhost:3000 | admin/admin |
+
+## 🔧 Rust Exporterエンドポイント
+
+### メトリクス確認
+```bash
+curl http://localhost:8080/metrics
+```
+
+### ヘルスチェック
+```bash
+curl http://localhost:8080/health
+```
+
+### 処理シミュレート
+```bash
+curl http://localhost:8080/simulate
+```
+
+### カスタムメトリクス送信
+```bash
+curl -X POST http://localhost:8080/custom \
+  -H 'Content-Type: application/json' \
+  -d '{"value": 42.5}'
+```
+
+## 📊 利用可能なメトリクス
+
+- `http_requests_total` - HTTPリクエスト総数
+- `http_requests_in_progress` - 現在処理中のHTTPリクエスト数
+- `http_request_duration_seconds` - HTTPリクエスト処理時間
+- `custom_operations_total` - カスタム操作の総数
+- `system_load_gauge` - システム負荷（シミュレート）
+
+## 🔨 開発
+
+### Rustアプリケーションの変更
+
+```bash
+cd prometheus_rust_exporter
+cargo run
+```
+
+### 設定変更
+
+- Prometheus設定: `prometheus_docker/prometheus.yml`
+- Docker Compose設定: `prometheus_docker/docker-compose.yml`
+
+## 🛑 停止・クリーンアップ
+
+```bash
+cd prometheus_docker
+docker-compose down --volumes
+```
+
+## 📈 Grafanaダッシュボード設定
+
+1. http://localhost:3000 にアクセス
+2. admin/admin でログイン
+3. データソース設定:
+   - URL: http://prometheus:9090
+   - Type: Prometheus
+4. ダッシュボードでクエリ例:
+   - `rate(http_requests_total[5m])` - リクエスト率
+   - `http_requests_in_progress` - 進行中リクエスト
+   - `system_load_gauge` - システム負荷
+
+## 🏗️ プロジェクト構造
+
+```
+├── prometheus_docker/          # Docker環境
+│   ├── docker-compose.yml     # サービス定義
+│   ├── prometheus.yml         # Prometheus設定
+│   └── start-monitoring.sh    # 起動スクリプト
+├── prometheus_rust_exporter/   # Rustアプリケーション
+│   ├── src/main.rs            # メインアプリケーション
+│   ├── Cargo.toml            # 依存関係
+│   └── Dockerfile            # Dockerイメージ
+├── Network-Traffic-Monitor/    # ネットワーク監視ツール
+└── setup.sh                  # 一括セットアップスクリプト
+```
+
+## 🔧 依存関係
+
+- Docker & Docker Compose
+- Rust (開発時)
+
+---
+
 # Simple Linux Router Setup (IPv4 Only) + Network Traffic Monitor
 
 A lightweight Linux router setup script for experimental use, providing IPv4 NAT, DHCP, and DNS services using nftables and dnsmasq, plus a Rust-based network traffic monitoring tool.
