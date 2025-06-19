@@ -1,3 +1,2 @@
 target
-rust-app.log
-./rust-app.log
+*rust-app.log*

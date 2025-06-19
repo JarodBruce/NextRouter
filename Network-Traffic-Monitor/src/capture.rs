@@ -332,6 +332,9 @@ pub struct NetworkMetrics {
     pub local_ip_rx_bytes_rate: prometheus::GaugeVec,  // 受信バイト数レート（ローカルIP別）
     pub local_ip_tx_packets_rate: prometheus::GaugeVec, // 送信パケット数レート（ローカルIP別）
     pub local_ip_rx_packets_rate: prometheus::GaugeVec, // 受信パケット数レート（ローカルIP別）
+    // 合計値用メトリクス
+    pub total_tx_bytes_rate: prometheus::Gauge,  // 全ローカルIPの送信バイト数レート合計
+    pub total_rx_bytes_rate: prometheus::Gauge,  // 全ローカルIPの受信バイト数レート合計
     // IP別内部カウンタ（差分計算用）
     pub internal_counters_per_ip: HashMap<String, LocalIpCounters>,
     pub last_update_time: std::time::Instant,
@@ -391,11 +394,24 @@ impl NetworkMetrics {
             &["local_ip"]
         ).unwrap();
 
+        // 合計値用メトリクス
+        let total_tx_bytes_rate = prometheus::Gauge::new(
+            "total_tx_bytes_rate",
+            "Total transmission rate in bytes/sec for all local IPs",
+        ).unwrap();
+        
+        let total_rx_bytes_rate = prometheus::Gauge::new(
+            "total_rx_bytes_rate",
+            "Total reception rate in bytes/sec for all local IPs",
+        ).unwrap();
+
         // レジストリにメトリクスを登録
         registry.register(Box::new(local_ip_tx_bytes_rate.clone())).unwrap();
         registry.register(Box::new(local_ip_rx_bytes_rate.clone())).unwrap();
         registry.register(Box::new(local_ip_tx_packets_rate.clone())).unwrap();
         registry.register(Box::new(local_ip_rx_packets_rate.clone())).unwrap();
+        registry.register(Box::new(total_tx_bytes_rate.clone())).unwrap();
+        registry.register(Box::new(total_rx_bytes_rate.clone())).unwrap();
 
         // デフォルトのローカルネットワーク範囲
         let local_network_ranges = vec![
@@ -411,6 +427,8 @@ impl NetworkMetrics {
             local_ip_rx_bytes_rate,
             local_ip_tx_packets_rate,
             local_ip_rx_packets_rate,
+            total_tx_bytes_rate,
+            total_rx_bytes_rate,
             internal_counters_per_ip: HashMap::new(),
             last_update_time: std::time::Instant::now(),
             local_network_ranges,
@@ -500,6 +518,10 @@ impl NetworkMetrics {
             return;
         }
 
+        // 合計値計算用の変数
+        let mut total_tx_bytes_rate = 0.0;
+        let mut total_rx_bytes_rate = 0.0;
+
         // 各ローカルIPのレートを計算して更新
         for (local_ip, counters) in self.internal_counters_per_ip.iter_mut() {
             // 差分計算
@@ -513,6 +535,10 @@ impl NetworkMetrics {
             let rx_bytes_rate = (rx_bytes_diff as f64) / elapsed_secs;
             let tx_packets_rate = (tx_packets_diff as f64) / elapsed_secs;
             let rx_packets_rate = (rx_packets_diff as f64) / elapsed_secs;
+
+            // 合計値に加算
+            total_tx_bytes_rate += tx_bytes_rate;
+            total_rx_bytes_rate += rx_bytes_rate;
 
             // Gaugeに設定
             self.local_ip_tx_bytes_rate
@@ -540,6 +566,10 @@ impl NetworkMetrics {
                       local_ip, tx_bytes_rate, rx_bytes_rate);
             }
         }
+
+        // 合計値メトリクスを設定
+        self.total_tx_bytes_rate.set(total_tx_bytes_rate);
+        self.total_rx_bytes_rate.set(total_rx_bytes_rate);
 
         self.last_update_time = now;
     }

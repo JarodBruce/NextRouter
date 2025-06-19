@@ -113,71 +113,27 @@ build_project() {
 # アプリケーション起動
 start_app() {
     local interface="${1:-$DEFAULT_INTERFACE}"
-    local port="${2:-$DEFAULT_PORT}"
+    local port=$DEFAULT_PORT
     
     info "アプリケーションを起動しています..."
     info "インターフェース: $interface"
     info "Prometheusポート: $port"
-    
-    # 既存のプロセスを確認
-    if pgrep -f "network-traffic-monitor" > /dev/null; then
-        warning "既にアプリケーションが稼働中です"
-        return
-    fi
     
     cd "$PROJECT_DIR"
     
     # Prometheusの設定に合わせて起動
     info "Rust Network Monitor を起動中..."
     
-    # バックグラウンドで起動
-    nohup sudo ./target/release/network-traffic-monitor \
+    # フォアグラウンドで起動
+    sudo ./target/release/network-traffic-monitor \
         --interface "$interface" \
         --metrics-port "$port" \
-        --verbose \
-        > ../rust-app.log 2>&1 &
-    
-    local pid=$!
-    echo $pid > ../rust-app.pid
-    
-    cd ..
-    
-    # 起動確認
-    sleep 3
-    if kill -0 $pid 2>/dev/null; then
-        success "アプリケーションが起動しました (PID: $pid)"
-        info "ログファイル: rust-app.log"
-        info "Prometheusエンドポイント: http://localhost:$port/metrics"
-    else
-        error "アプリケーションの起動に失敗しました"
-        error "ログを確認してください: tail -f rust-app.log"
-        exit 1
-    fi
+        --verbose
 }
 
 # アプリケーション停止
 stop_app() {
     info "アプリケーションを停止しています..."
-    
-    if [[ -f "rust-app.pid" ]]; then
-        local pid=$(cat rust-app.pid)
-        if kill -0 $pid 2>/dev/null; then
-            sudo kill $pid
-            rm -f rust-app.pid
-            success "アプリケーションを停止しました"
-        else
-            warning "プロセスが見つかりません"
-            rm -f rust-app.pid
-        fi
-    else
-        # プロセス名で検索して停止
-        if pgrep -f "network-traffic-monitor" > /dev/null; then
-            sudo pkill -f "network-traffic-monitor"
-            success "アプリケーションを停止しました"
-        else
-            info "停止するプロセスが見つかりません"
-        fi
-    fi
 }
 
 # ステータス確認
@@ -189,20 +145,6 @@ check_status() {
         
         local pid=$(pgrep -f "network-traffic-monitor")
         echo "PID: $pid"
-        
-        # ポート確認
-        if netstat -tulpn 2>/dev/null | grep ":$DEFAULT_PORT " > /dev/null; then
-            success "ポート $DEFAULT_PORT で待機中"
-        else
-            warning "ポート $DEFAULT_PORT が開いていません"
-        fi
-        
-        # 最近のログ
-        if [[ -f "rust-app.log" ]]; then
-            echo ""
-            echo "=== 最近のログ (最新10行) ==="
-            tail -n 10 rust-app.log
-        fi
     else
         warning "アプリケーションは停止中です"
     fi
