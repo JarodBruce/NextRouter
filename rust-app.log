@@ -28942,3 +28942,486 @@ Health check available at http://0.0.0.0:8080/health
 [2025-06-19T01:19:22Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.136"} 0.9998539703277797
 [2025-06-19T01:19:22Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.157"} 0
 [2025-06-19T01:19:22Z INFO  network_traffic_monitor::capture] ==========================================
+[2025-06-19T01:19:23Z INFO  network_traffic_monitor::capture] Local IP 10.40.0.136 - TX: 98.0 bytes/s, RX: 98.0 bytes/s
+[2025-06-19T01:19:23Z INFO  network_traffic_monitor::capture] === Network Metrics (1s interval) ===
+[2025-06-19T01:19:23Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:23Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.136"} 97.99694729709475
+[2025-06-19T01:19:23Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:23Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:23Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.136"} 0.9999688499703546
+[2025-06-19T01:19:23Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:23Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:23Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.136"} 97.99694729709475
+[2025-06-19T01:19:23Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:23Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:23Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.136"} 0.9999688499703546
+[2025-06-19T01:19:23Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:23Z INFO  network_traffic_monitor::capture] ==========================================
+[2025-06-19T01:19:24Z INFO  network_traffic_monitor::capture] === Network Metrics (1s interval) ===
+[2025-06-19T01:19:24Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:24Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.136"} 97.99694729709475
+[2025-06-19T01:19:24Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:24Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:24Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.136"} 0.9999688499703546
+[2025-06-19T01:19:24Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:24Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:24Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.136"} 97.99694729709475
+[2025-06-19T01:19:24Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:24Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:24Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.136"} 0.9999688499703546
+[2025-06-19T01:19:24Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:24Z INFO  network_traffic_monitor::capture] ==========================================
+[2025-06-19T01:19:25Z INFO  network_traffic_monitor::capture] Local IP 10.40.0.136 - TX: 98.0 bytes/s, RX: 98.0 bytes/s
+[2025-06-19T01:19:25Z INFO  network_traffic_monitor::capture] === Network Metrics (1s interval) ===
+[2025-06-19T01:19:25Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:25Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.136"} 98.00208107419161
+[2025-06-19T01:19:25Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:25Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:25Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.136"} 1.0000212354509348
+[2025-06-19T01:19:25Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:25Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:25Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.136"} 98.00208107419161
+[2025-06-19T01:19:25Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:25Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:25Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.136"} 1.0000212354509348
+[2025-06-19T01:19:25Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:25Z INFO  network_traffic_monitor::capture] ==========================================
+[2025-06-19T01:19:26Z INFO  network_traffic_monitor::capture] === Network Metrics (1s interval) ===
+[2025-06-19T01:19:26Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:26Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.136"} 98.00208107419161
+[2025-06-19T01:19:26Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:26Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:26Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.136"} 1.0000212354509348
+[2025-06-19T01:19:26Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:26Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:26Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.136"} 98.00208107419161
+[2025-06-19T01:19:26Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:26Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:26Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.136"} 1.0000212354509348
+[2025-06-19T01:19:26Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:26Z INFO  network_traffic_monitor::capture] ==========================================
+[2025-06-19T01:19:27Z INFO  network_traffic_monitor::capture] Local IP 10.40.0.136 - TX: 98.0 bytes/s, RX: 98.0 bytes/s
+[2025-06-19T01:19:27Z INFO  network_traffic_monitor::capture] === Network Metrics (1s interval) ===
+[2025-06-19T01:19:27Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:27Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.136"} 98.02113311124594
+[2025-06-19T01:19:27Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:27Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:27Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.136"} 1.0002156439923056
+[2025-06-19T01:19:27Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:27Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:27Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.136"} 98.02113311124594
+[2025-06-19T01:19:27Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:27Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:27Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.136"} 1.0002156439923056
+[2025-06-19T01:19:27Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:27Z INFO  network_traffic_monitor::capture] ==========================================
+[2025-06-19T01:19:28Z INFO  network_traffic_monitor::capture] === Network Metrics (1s interval) ===
+[2025-06-19T01:19:28Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:28Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.136"} 98.02113311124594
+[2025-06-19T01:19:28Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:28Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:28Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.136"} 1.0002156439923056
+[2025-06-19T01:19:28Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:28Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:28Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.136"} 98.02113311124594
+[2025-06-19T01:19:28Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:28Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:28Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.136"} 1.0002156439923056
+[2025-06-19T01:19:28Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:28Z INFO  network_traffic_monitor::capture] ==========================================
+[2025-06-19T01:19:29Z INFO  network_traffic_monitor::capture] Local IP 10.40.0.136 - TX: 98.0 bytes/s, RX: 98.0 bytes/s
+[2025-06-19T01:19:29Z INFO  network_traffic_monitor::capture] === Network Metrics (1s interval) ===
+[2025-06-19T01:19:29Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:29Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.136"} 98.00382631438887
+[2025-06-19T01:19:29Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:29Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:29Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.136"} 1.0000390440243763
+[2025-06-19T01:19:29Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:29Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:29Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.136"} 98.00382631438887
+[2025-06-19T01:19:29Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:29Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:29Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.136"} 1.0000390440243763
+[2025-06-19T01:19:29Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:29Z INFO  network_traffic_monitor::capture] ==========================================
+[2025-06-19T01:19:30Z INFO  network_traffic_monitor::capture] === Network Metrics (1s interval) ===
+[2025-06-19T01:19:30Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:30Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.136"} 98.00382631438887
+[2025-06-19T01:19:30Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:30Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:30Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.136"} 1.0000390440243763
+[2025-06-19T01:19:30Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:30Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:30Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.136"} 98.00382631438887
+[2025-06-19T01:19:30Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:30Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:30Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.136"} 1.0000390440243763
+[2025-06-19T01:19:30Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:30Z INFO  network_traffic_monitor::capture] ==========================================
+[2025-06-19T01:19:30Z INFO  network_traffic_monitor::capture] Local IP 10.40.0.136 - TX: 98.0 bytes/s, RX: 98.0 bytes/s
+[2025-06-19T01:19:31Z INFO  network_traffic_monitor::capture] === Network Metrics (1s interval) ===
+[2025-06-19T01:19:31Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:31Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.136"} 97.95369082540324
+[2025-06-19T01:19:31Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:31Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:31Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.136"} 0.9995274574020739
+[2025-06-19T01:19:31Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:31Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:31Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.136"} 97.95369082540324
+[2025-06-19T01:19:31Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:31Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:31Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.136"} 0.9995274574020739
+[2025-06-19T01:19:31Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:31Z INFO  network_traffic_monitor::capture] ==========================================
+[2025-06-19T01:19:32Z INFO  network_traffic_monitor::capture] === Network Metrics (1s interval) ===
+[2025-06-19T01:19:32Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:32Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.136"} 97.95369082540324
+[2025-06-19T01:19:32Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:32Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:32Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.136"} 0.9995274574020739
+[2025-06-19T01:19:32Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:32Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:32Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.136"} 97.95369082540324
+[2025-06-19T01:19:32Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:32Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:32Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.136"} 0.9995274574020739
+[2025-06-19T01:19:32Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:32Z INFO  network_traffic_monitor::capture] ==========================================
+[2025-06-19T01:19:32Z INFO  network_traffic_monitor::capture] Local IP 10.40.0.136 - TX: 98.0 bytes/s, RX: 98.0 bytes/s
+[2025-06-19T01:19:33Z INFO  network_traffic_monitor::capture] === Network Metrics (1s interval) ===
+[2025-06-19T01:19:33Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:33Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.136"} 97.99255148816883
+[2025-06-19T01:19:33Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:33Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:33Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.136"} 0.999923994777233
+[2025-06-19T01:19:33Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:33Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:33Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.136"} 97.99255148816883
+[2025-06-19T01:19:33Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:33Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:33Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.136"} 0.999923994777233
+[2025-06-19T01:19:33Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:33Z INFO  network_traffic_monitor::capture] ==========================================
+[2025-06-19T01:19:34Z INFO  network_traffic_monitor::capture] === Network Metrics (1s interval) ===
+[2025-06-19T01:19:34Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:34Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.136"} 97.99255148816883
+[2025-06-19T01:19:34Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:34Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:34Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.136"} 0.999923994777233
+[2025-06-19T01:19:34Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:34Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:34Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.136"} 97.99255148816883
+[2025-06-19T01:19:34Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:34Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:34Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.136"} 0.999923994777233
+[2025-06-19T01:19:34Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:34Z INFO  network_traffic_monitor::capture] ==========================================
+[2025-06-19T01:19:34Z INFO  network_traffic_monitor::capture] Local IP 10.40.0.136 - TX: 98.0 bytes/s, RX: 98.0 bytes/s
+[2025-06-19T01:19:35Z INFO  network_traffic_monitor::capture] === Network Metrics (1s interval) ===
+[2025-06-19T01:19:35Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:35Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.136"} 98.03282889062399
+[2025-06-19T01:19:35Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:35Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:35Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.136"} 1.0003349886798367
+[2025-06-19T01:19:35Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:35Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:35Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.136"} 98.03282889062399
+[2025-06-19T01:19:35Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:35Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:35Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.136"} 1.0003349886798367
+[2025-06-19T01:19:35Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:35Z INFO  network_traffic_monitor::capture] ==========================================
+[2025-06-19T01:19:36Z INFO  network_traffic_monitor::capture] === Network Metrics (1s interval) ===
+[2025-06-19T01:19:36Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:36Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.136"} 98.03282889062399
+[2025-06-19T01:19:36Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:36Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:36Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.136"} 1.0003349886798367
+[2025-06-19T01:19:36Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:36Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:36Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.136"} 98.03282889062399
+[2025-06-19T01:19:36Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:36Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:36Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.136"} 1.0003349886798367
+[2025-06-19T01:19:36Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:36Z INFO  network_traffic_monitor::capture] ==========================================
+[2025-06-19T01:19:36Z INFO  network_traffic_monitor::capture] Local IP 10.40.0.136 - TX: 98.0 bytes/s, RX: 98.0 bytes/s
+[2025-06-19T01:19:37Z INFO  network_traffic_monitor::capture] Local IP 10.40.0.136 - TX: 98.0 bytes/s, RX: 98.0 bytes/s
+[2025-06-19T01:19:37Z INFO  network_traffic_monitor::capture] === Network Metrics (1s interval) ===
+[2025-06-19T01:19:37Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:37Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.136"} 97.96395475063323
+[2025-06-19T01:19:37Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:37Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:37Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.136"} 0.9996321913329922
+[2025-06-19T01:19:37Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:37Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:37Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.136"} 97.96395475063323
+[2025-06-19T01:19:37Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:37Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:37Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.136"} 0.9996321913329922
+[2025-06-19T01:19:37Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:37Z INFO  network_traffic_monitor::capture] ==========================================
+[2025-06-19T01:19:38Z INFO  network_traffic_monitor::capture] === Network Metrics (1s interval) ===
+[2025-06-19T01:19:38Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:38Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.136"} 97.96395475063323
+[2025-06-19T01:19:38Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:38Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:38Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.136"} 0.9996321913329922
+[2025-06-19T01:19:38Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:38Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:38Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.136"} 97.96395475063323
+[2025-06-19T01:19:38Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:38Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:38Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.136"} 0.9996321913329922
+[2025-06-19T01:19:38Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:38Z INFO  network_traffic_monitor::capture] ==========================================
+[2025-06-19T01:19:39Z INFO  network_traffic_monitor::capture] Local IP 10.40.0.136 - TX: 98.0 bytes/s, RX: 98.0 bytes/s
+[2025-06-19T01:19:39Z INFO  network_traffic_monitor::capture] === Network Metrics (1s interval) ===
+[2025-06-19T01:19:39Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:39Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.136"} 98.03426576986314
+[2025-06-19T01:19:39Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:39Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:39Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.136"} 1.000349650712889
+[2025-06-19T01:19:39Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:39Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:39Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.136"} 98.03426576986314
+[2025-06-19T01:19:39Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:39Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:39Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.136"} 1.000349650712889
+[2025-06-19T01:19:39Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:39Z INFO  network_traffic_monitor::capture] ==========================================
+[2025-06-19T01:19:40Z INFO  network_traffic_monitor::capture] === Network Metrics (1s interval) ===
+[2025-06-19T01:19:40Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:40Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.136"} 98.03426576986314
+[2025-06-19T01:19:40Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:40Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:40Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.136"} 1.000349650712889
+[2025-06-19T01:19:40Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:40Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:40Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.136"} 98.03426576986314
+[2025-06-19T01:19:40Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:40Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:40Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.136"} 1.000349650712889
+[2025-06-19T01:19:40Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:40Z INFO  network_traffic_monitor::capture] ==========================================
+[2025-06-19T01:19:40Z INFO  network_traffic_monitor::capture] Local IP 10.40.0.136 - TX: 97.9 bytes/s, RX: 97.9 bytes/s
+[2025-06-19T01:19:41Z INFO  network_traffic_monitor::capture] === Network Metrics (1s interval) ===
+[2025-06-19T01:19:41Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:41Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.136"} 97.94026437189456
+[2025-06-19T01:19:41Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:41Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:41Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.136"} 0.9993904527744343
+[2025-06-19T01:19:41Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:41Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:41Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.136"} 97.94026437189456
+[2025-06-19T01:19:41Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:41Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:41Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.136"} 0.9993904527744343
+[2025-06-19T01:19:41Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:41Z INFO  network_traffic_monitor::capture] ==========================================
+[2025-06-19T01:19:42Z INFO  network_traffic_monitor::capture] === Network Metrics (1s interval) ===
+[2025-06-19T01:19:42Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:42Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.136"} 97.94026437189456
+[2025-06-19T01:19:42Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:42Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:42Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.136"} 0.9993904527744343
+[2025-06-19T01:19:42Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:42Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:42Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.136"} 97.94026437189456
+[2025-06-19T01:19:42Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:42Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:42Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.136"} 0.9993904527744343
+[2025-06-19T01:19:42Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:42Z INFO  network_traffic_monitor::capture] ==========================================
+[2025-06-19T01:19:42Z INFO  network_traffic_monitor::capture] Local IP 10.40.0.136 - TX: 98.0 bytes/s, RX: 98.0 bytes/s
+[2025-06-19T01:19:43Z INFO  network_traffic_monitor::capture] Local IP 10.40.0.136 - TX: 97.9 bytes/s, RX: 97.9 bytes/s
+[2025-06-19T01:19:43Z INFO  network_traffic_monitor::capture] === Network Metrics (1s interval) ===
+[2025-06-19T01:19:43Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:43Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.136"} 97.9382378946042
+[2025-06-19T01:19:43Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:43Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:43Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.136"} 0.9993697744347367
+[2025-06-19T01:19:43Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:43Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:43Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.136"} 97.9382378946042
+[2025-06-19T01:19:43Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:43Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:43Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.136"} 0.9993697744347367
+[2025-06-19T01:19:43Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:43Z INFO  network_traffic_monitor::capture] ==========================================
+[2025-06-19T01:19:44Z INFO  network_traffic_monitor::capture] === Network Metrics (1s interval) ===
+[2025-06-19T01:19:44Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:44Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.136"} 97.9382378946042
+[2025-06-19T01:19:44Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:44Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:44Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.136"} 0.9993697744347367
+[2025-06-19T01:19:44Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:44Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:44Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.136"} 97.9382378946042
+[2025-06-19T01:19:44Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:44Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:44Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.136"} 0.9993697744347367
+[2025-06-19T01:19:44Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:44Z INFO  network_traffic_monitor::capture] ==========================================
+[2025-06-19T01:19:45Z INFO  network_traffic_monitor::capture] Local IP 10.40.0.136 - TX: 98.0 bytes/s, RX: 98.0 bytes/s
+[2025-06-19T01:19:45Z INFO  network_traffic_monitor::capture] === Network Metrics (1s interval) ===
+[2025-06-19T01:19:45Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:45Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.136"} 98.0323994139091
+[2025-06-19T01:19:45Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:45Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:45Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.136"} 1.0003306062643786
+[2025-06-19T01:19:45Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:45Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:45Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.136"} 98.0323994139091
+[2025-06-19T01:19:45Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:45Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:45Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.136"} 1.0003306062643786
+[2025-06-19T01:19:45Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:45Z INFO  network_traffic_monitor::capture] ==========================================
+[2025-06-19T01:19:46Z INFO  network_traffic_monitor::capture] === Network Metrics (1s interval) ===
+[2025-06-19T01:19:46Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:46Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.136"} 98.0323994139091
+[2025-06-19T01:19:46Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:46Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:46Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.136"} 1.0003306062643786
+[2025-06-19T01:19:46Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:46Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:46Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.136"} 98.0323994139091
+[2025-06-19T01:19:46Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:46Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:46Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.136"} 1.0003306062643786
+[2025-06-19T01:19:46Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:46Z INFO  network_traffic_monitor::capture] ==========================================
+[2025-06-19T01:19:46Z INFO  network_traffic_monitor::capture] Local IP 10.40.0.136 - TX: 98.0 bytes/s, RX: 98.0 bytes/s
+[2025-06-19T01:19:47Z INFO  network_traffic_monitor::capture] Local IP 10.40.0.136 - TX: 98.0 bytes/s, RX: 98.0 bytes/s
+[2025-06-19T01:19:47Z INFO  network_traffic_monitor::capture] === Network Metrics (1s interval) ===
+[2025-06-19T01:19:47Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:47Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.136"} 97.97088932183047
+[2025-06-19T01:19:47Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:47Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:47Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.136"} 0.9997029522635763
+[2025-06-19T01:19:47Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:47Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:47Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.136"} 97.97088932183047
+[2025-06-19T01:19:47Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:47Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:47Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.136"} 0.9997029522635763
+[2025-06-19T01:19:47Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:47Z INFO  network_traffic_monitor::capture] ==========================================
+[2025-06-19T01:19:48Z INFO  network_traffic_monitor::capture] === Network Metrics (1s interval) ===
+[2025-06-19T01:19:48Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:48Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.136"} 97.97088932183047
+[2025-06-19T01:19:48Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:48Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:48Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.136"} 0.9997029522635763
+[2025-06-19T01:19:48Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:48Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:48Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.136"} 97.97088932183047
+[2025-06-19T01:19:48Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:48Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:48Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.136"} 0.9997029522635763
+[2025-06-19T01:19:48Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:48Z INFO  network_traffic_monitor::capture] ==========================================
+[2025-06-19T01:19:48Z INFO  network_traffic_monitor::capture] Local IP 10.40.0.136 - TX: 97.9 bytes/s, RX: 97.9 bytes/s
+[2025-06-19T01:19:49Z INFO  network_traffic_monitor::capture] === Network Metrics (1s interval) ===
+[2025-06-19T01:19:49Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:49Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.136"} 97.94237237311599
+[2025-06-19T01:19:49Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:49Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:49Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.136"} 0.9994119629909796
+[2025-06-19T01:19:49Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:49Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:49Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.136"} 97.94237237311599
+[2025-06-19T01:19:49Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:49Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:49Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.136"} 0.9994119629909796
+[2025-06-19T01:19:49Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:49Z INFO  network_traffic_monitor::capture] ==========================================
+[2025-06-19T01:19:50Z INFO  network_traffic_monitor::capture] === Network Metrics (1s interval) ===
+[2025-06-19T01:19:50Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:50Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.136"} 97.94237237311599
+[2025-06-19T01:19:50Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:50Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:50Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.136"} 0.9994119629909796
+[2025-06-19T01:19:50Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:50Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:50Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.136"} 97.94237237311599
+[2025-06-19T01:19:50Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:50Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:50Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.136"} 0.9994119629909796
+[2025-06-19T01:19:50Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:50Z INFO  network_traffic_monitor::capture] ==========================================
+[2025-06-19T01:19:50Z INFO  network_traffic_monitor::capture] Local IP 10.40.0.136 - TX: 98.0 bytes/s, RX: 98.0 bytes/s
+[2025-06-19T01:19:51Z INFO  network_traffic_monitor::capture] === Network Metrics (1s interval) ===
+[2025-06-19T01:19:51Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:51Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.136"} 98.00921722782958
+[2025-06-19T01:19:51Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:51Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:51Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.136"} 1.0000940533451999
+[2025-06-19T01:19:51Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:51Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:51Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.136"} 98.00921722782958
+[2025-06-19T01:19:51Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:51Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:51Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.136"} 1.0000940533451999
+[2025-06-19T01:19:51Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:51Z INFO  network_traffic_monitor::capture] ==========================================
+[2025-06-19T01:19:52Z INFO  network_traffic_monitor::capture] === Network Metrics (1s interval) ===
+[2025-06-19T01:19:52Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:52Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.136"} 98.00921722782958
+[2025-06-19T01:19:52Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:52Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:52Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.136"} 1.0000940533451999
+[2025-06-19T01:19:52Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:52Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:52Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.136"} 98.00921722782958
+[2025-06-19T01:19:52Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:52Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:52Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.136"} 1.0000940533451999
+[2025-06-19T01:19:52Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:52Z INFO  network_traffic_monitor::capture] ==========================================
+[2025-06-19T01:19:52Z INFO  network_traffic_monitor::capture] Local IP 10.40.0.136 - TX: 98.0 bytes/s, RX: 98.0 bytes/s
+[2025-06-19T01:19:53Z INFO  network_traffic_monitor::capture] Local IP 10.40.0.136 - TX: 98.0 bytes/s, RX: 98.0 bytes/s
+[2025-06-19T01:19:53Z INFO  network_traffic_monitor::capture] === Network Metrics (1s interval) ===
+[2025-06-19T01:19:53Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:53Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.136"} 97.9550086767847
+[2025-06-19T01:19:53Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:53Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:53Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.136"} 0.99954090486515
+[2025-06-19T01:19:53Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:53Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:53Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.136"} 97.9550086767847
+[2025-06-19T01:19:53Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:53Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:53Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.136"} 0.99954090486515
+[2025-06-19T01:19:53Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:53Z INFO  network_traffic_monitor::capture] ==========================================
+[2025-06-19T01:19:54Z INFO  network_traffic_monitor::capture] === Network Metrics (1s interval) ===
+[2025-06-19T01:19:54Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:54Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.136"} 97.9550086767847
+[2025-06-19T01:19:54Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:54Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:54Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.136"} 0.99954090486515
+[2025-06-19T01:19:54Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:54Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:54Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.136"} 97.9550086767847
+[2025-06-19T01:19:54Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:54Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:54Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.136"} 0.99954090486515
+[2025-06-19T01:19:54Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:54Z INFO  network_traffic_monitor::capture] ==========================================
+[2025-06-19T01:19:55Z INFO  network_traffic_monitor::capture] Local IP 10.40.0.136 - TX: 98.0 bytes/s, RX: 98.0 bytes/s
+[2025-06-19T01:19:55Z INFO  network_traffic_monitor::capture] === Network Metrics (1s interval) ===
+[2025-06-19T01:19:55Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:55Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.136"} 97.99570582817061
+[2025-06-19T01:19:55Z INFO  network_traffic_monitor::capture] local_ip_rx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:55Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:55Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.136"} 0.9999561819201084
+[2025-06-19T01:19:55Z INFO  network_traffic_monitor::capture] local_ip_rx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:55Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:55Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.136"} 97.99570582817061
+[2025-06-19T01:19:55Z INFO  network_traffic_monitor::capture] local_ip_tx_bytes_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:55Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.1"} 0
+[2025-06-19T01:19:55Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.136"} 0.9999561819201084
+[2025-06-19T01:19:55Z INFO  network_traffic_monitor::capture] local_ip_tx_packets_rate{local_ip="10.40.0.157"} 0
+[2025-06-19T01:19:55Z INFO  network_traffic_monitor::capture] ==========================================
