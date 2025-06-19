@@ -34,7 +34,23 @@ chmod +x prometheus-manager.sh
 ./prometheus-manager.sh start     # 起動
 ```
 
-### 3. ネットワーク監視開始
+### 3. Grafanaセットアップ（可視化）
+
+```bash
+# Grafana インストール・設定
+./grafana-setup.sh
+
+# PrometheusデータソースとダッシュボードをGrafanaに設定
+./grafana-configure.sh
+
+# 管理ユーティリティ使用
+chmod +x grafana-manager.sh
+./grafana-manager.sh status     # ステータス確認
+./grafana-manager.sh start      # 起動
+./grafana-manager.sh dashboard  # ダッシュボードを開く
+```
+
+### 4. ネットワーク監視開始
 
 ```bash
 # Rust監視ツール管理
@@ -47,7 +63,7 @@ chmod +x rust-app-manager.sh
 ./rust-app-manager.sh start lo 8080
 ```
 
-### 4. ルーター設定（実験用）
+### 5. ルーター設定（実験用）
 
 ```bash
 # IPv4ルーター設定（要root権限）
@@ -57,14 +73,40 @@ sudo ./nftables-setup.sh <WAN_INTERFACE> <LAN_INTERFACE>
 sudo ./nftables-setup.sh eth0 eth1
 ```
 
+## 🚀 クイック統合セットアップ
+
+全ての機能を一度にセットアップしたい場合：
+
+```bash
+# 全コンポーネント統合セットアップ（テスト用）
+chmod +x setup-complete.sh
+./setup-complete.sh
+```
+
+これによりPrometheus + Grafana + ネットワーク監視が自動的にセットアップされ、指定されたメトリクスフィルターを使用したダッシュボードが作成されます。
+
 ## 📱 アクセス先
 
 | サービス | URL | 説明 |
 |---------|-----|------|
 | Prometheus | http://localhost:9090 | メトリクス管理・クエリ |
+| Grafana | http://localhost:3000 | ダッシュボード・可視化 |
 | Network Monitor | http://localhost:8080/metrics | ネットワークメトリクス |
 
 ## 🔧 管理コマンド
+
+### Grafana管理
+
+```bash
+# 基本操作
+./grafana-manager.sh status     # ステータス確認
+./grafana-manager.sh start      # 起動
+./grafana-manager.sh stop       # 停止
+./grafana-manager.sh restart    # 再起動
+./grafana-manager.sh logs       # ログ表示
+./grafana-manager.sh dashboard  # ダッシュボードを開く
+./grafana-manager.sh configure  # 設定の再実行
+```
 
 ### Prometheus管理
 
@@ -146,6 +188,19 @@ scrape_configs:
 sudo systemctl status prometheus
 ```
 
+### Grafanaが起動しない場合
+
+```bash
+# ログ確認
+./grafana-manager.sh logs
+
+# 設定ファイル検証
+./grafana-manager.sh check
+
+# サービス状態確認
+sudo systemctl status grafana-server
+```
+
 ### ネットワーク監視が動作しない場合
 
 ```bash
@@ -188,6 +243,8 @@ NextRouter/
 ├── prometheus.yml                  # Prometheus設定ファイル
 ├── prometheus.sh                   # Prometheusインストールスクリプト
 ├── prometheus-manager.sh           # Prometheus管理ユーティリティ
+├── grafana-setup.sh               # Grafanaインストールスクリプト
+├── grafana-manager.sh              # Grafana管理ユーティリティ
 ├── rust-app-manager.sh            # Rust監視ツール管理スクリプト
 ├── nftables-setup.sh              # ルーター設定スクリプト
 ├── prometheus-install.md          # Prometheus詳細インストールガイド
