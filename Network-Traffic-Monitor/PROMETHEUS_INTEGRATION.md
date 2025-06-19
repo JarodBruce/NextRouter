@@ -27,9 +27,6 @@ sudo ./target/release/network-traffic-monitor -i eth0
 
 # 詳細ログを有効にする
 sudo ./target/release/network-traffic-monitor -v
-
-# Prometheusメトリクスの更新間隔を変更（デフォルト15秒）
-sudo ./target/release/network-traffic-monitor -t 10
 ```
 
 ### オプション
