@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::net::IpAddr;
+use std::sync::{Arc, Mutex};
 
 /// ネットワークトラフィックの統計情報を格納する構造体
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -240,6 +241,20 @@ impl TrafficStatistics {
         )
     }
 }
+
+#[derive(Debug, Default, Clone)]
+pub struct IpStats {
+    pub tx_bytes: u64,
+    pub rx_bytes: u64,
+    pub tx_packets: u64,
+    pub rx_packets: u64,
+    pub tx_bytes_per_sec: u64,
+    pub rx_bytes_per_sec: u64,
+    pub tx_packets_per_sec: u64,
+    pub rx_packets_per_sec: u64,
+}
+
+pub type IpStatsMap = Arc<Mutex<HashMap<IpAddr, IpStats>>>;
 
 #[cfg(test)]
 mod tests {
