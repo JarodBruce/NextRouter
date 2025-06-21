@@ -74,9 +74,9 @@ check_project() {
 
 # Rustの確認とセットアップ
 check_rust() {
-    if ! command -v cargo &> /dev/null; then
+    if ! command -v cargo >/dev/null 2>&1; then
         error "Rustがインストールされていません"
-        info "Rustをインストールしてください: https://rustup.rs/"
+        info "Rustをインストールしてください: sudo snap install rustup --classic"
         exit 1
     fi
     

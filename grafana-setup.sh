@@ -14,16 +14,40 @@ echo "🚀 Starting Grafana setup..."
 if ! command -v grafana-server &> /dev/null; then
     echo "📦 Installing Grafana..."
     
+    # 既存のGrafanaリポジトリ設定をクリーンアップ
+    if [ -f /etc/apt/sources.list.d/grafana.list ]; then
+        echo "🧹 Cleaning up existing Grafana repository configuration..."
+        sudo rm -f /etc/apt/sources.list.d/grafana.list
+    fi
+    
     # Grafana GPGキーを追加
     sudo mkdir -p /etc/apt/keyrings/
     wget -q -O - https://apt.grafana.com/gpg.key | gpg --dearmor | sudo tee /etc/apt/keyrings/grafana.gpg > /dev/null
     
-    # Grafanaリポジトリを追加
-    echo "deb [signed-by=/etc/apt/keyrings/grafana.gpg] https://apt.grafana.com stable main" | sudo tee -a /etc/apt/sources.list.d/grafana.list
+    # Grafanaリポジトリを追加（重複を避けるために新しく作成）
+    echo "deb [signed-by=/etc/apt/keyrings/grafana.gpg] https://apt.grafana.com stable main" | sudo tee /etc/apt/sources.list.d/grafana.list
     
-    # パッケージリストを更新してGrafanaをインストール
-    sudo apt update
-    sudo apt install -y grafana
+    # パッケージリストを更新（リトライ機能付き）
+    echo "🔄 Updating package lists..."
+    for i in {1..3}; do
+        echo "Attempt $i/3..."
+        if sudo apt update; then
+            echo "✅ Package lists updated successfully"
+            break
+        else
+            if [ $i -eq 3 ]; then
+                echo "❌ Failed to update package lists after 3 attempts"
+                echo "💡 This might be a temporary mirror sync issue. Please try again later."
+                exit 1
+            fi
+            echo "⏳ Waiting 10 seconds before retry..."
+            sleep 10
+        fi
+    done
+    
+    # Grafanaをインストール
+    echo "📦 Installing Grafana package..."
+    sudo apt update && sudo apt install -y grafana
     
     echo "✅ Grafana installed successfully"
 else
@@ -34,6 +58,7 @@ fi
 echo "🔄 Starting Grafana service..."
 sudo systemctl start grafana-server
 sudo systemctl enable grafana-server
+
 
 # サービスが起動するまで少し待つ
 sleep 5
