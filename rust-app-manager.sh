@@ -33,8 +33,6 @@ error() {
 # 設定
 PROJECT_DIR="Network-Traffic-Monitor"
 DEFAULT_INTERFACE="lo"  # ローカルテスト用
-DEFAULT_PORT="8080"     # Prometheusが期待するポート
-METRICS_PORT="9090"     # 内部メトリクスサーバー用
 
 # 使用方法
 show_usage() {
@@ -43,7 +41,7 @@ show_usage() {
     echo "使用方法: $0 [オプション]"
     echo ""
     echo "オプション:"
-    echo "  start [interface] [port]  - アプリケーションを起動 (デフォルト: lo 8080)"
+    echo "  start [interface]         - アプリケーションを起動"
     echo "  build                     - プロジェクトをビルド"
     echo "  stop                      - アプリケーションを停止"
     echo "  status                    - 稼働状態を確認"
@@ -51,10 +49,6 @@ show_usage() {
     echo "  interfaces                - 利用可能なネットワークインターフェースを表示"
     echo "  help                      - このヘルプを表示"
     echo ""
-    echo "例:"
-    echo "  $0 start lo 8080         # ローカルループバックでテスト"
-    echo "  $0 start eth0 8080       # eth0インターフェースを監視"
-    echo "  $0 test                  # Prometheusエンドポイントをテスト"
 }
 
 # プロジェクトディレクトリの確認
@@ -113,11 +107,9 @@ build_project() {
 # アプリケーション起動
 start_app() {
     local interface="${1:-$DEFAULT_INTERFACE}"
-    local port=$DEFAULT_PORT
     
     info "アプリケーションを起動しています..."
     info "インターフェース: $interface"
-    info "Prometheusポート: $port"
     
     cd "$PROJECT_DIR"
     
@@ -126,13 +118,12 @@ start_app() {
     
     # フォアグラウンドで起動
     sudo ./target/release/network-traffic-monitor \
-        --interface "$interface" \
-        --metrics-port "$port" \
-        --verbose
+        --interface "$interface"
 }
 
 # アプリケーション停止
 stop_app() {
+    sudo pkill -9 -f rust-app-manager
     info "アプリケーションを停止しています..."
 }
 
@@ -147,29 +138,6 @@ check_status() {
         echo "PID: $pid"
     else
         warning "アプリケーションは停止中です"
-    fi
-}
-
-# 接続テスト
-test_connection() {
-    echo "=== Prometheus エンドポイント接続テスト ==="
-    
-    local url="http://localhost:$DEFAULT_PORT/metrics"
-    info "テスト URL: $url"
-    
-    if command -v curl &> /dev/null; then
-        if curl -s --max-time 5 "$url" > /dev/null; then
-            success "接続成功!"
-            echo ""
-            echo "=== メトリクス例 (最初の10行) ==="
-            curl -s "$url" | head -10
-        else
-            error "接続失敗"
-            info "アプリケーションが起動しているか確認してください"
-        fi
-    else
-        warning "curlがインストールされていません"
-        info "手動でブラウザでアクセスしてください: $url"
     fi
 }
 

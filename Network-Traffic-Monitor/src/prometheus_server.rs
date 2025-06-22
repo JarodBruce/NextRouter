@@ -1,7 +1,7 @@
 use std::time::Duration;
 use std::sync::Arc;
 use std::net::SocketAddr;
-use prometheus::{Counter, Gauge, GaugeVec, Registry, TextEncoder};
+use prometheus::{Gauge, GaugeVec, Registry, TextEncoder};
 use prometheus::core::Collector;
 use hyper::{Request, Response, Method, StatusCode};
 use hyper::service::service_fn;

@@ -14,46 +14,17 @@ struct Args {
     /// Network interface to monitor (default: ens19)
     #[arg(short, long, default_value = "ens19")]
     interface: String,
-
-    /// Enable verbose logging
-    #[arg(short, long)]
-    verbose: bool,
-
-    /// Port for metrics server (default: 9090)
-    #[arg(short = 'm', long, default_value = "9090")]
-    metrics_port: u16,
-
-    /// Prometheus server URL for pushing metrics (optional)
-    #[arg(short = 'p', long)]
-    prometheus_url: Option<String>,
-
-    /// Interval in seconds for sending metrics to Prometheus (default: 15)
-    #[arg(short = 't', long, default_value = "15")]
-    prometheus_interval: u64,
 }
 
 #[tokio::main]
 async fn main() -> Result<()> {
     let args = Args::parse();
-
-    // ログレベルの設定
-    if args.verbose {
-        env_logger::Builder::from_default_env()
-            .filter_level(log::LevelFilter::Debug)
-            .init();
-    } else {
-        env_logger::Builder::from_default_env()
-            .filter_level(log::LevelFilter::Info)
-            .init();
-    }
+    env_logger::Builder::from_default_env()
+        .filter_level(log::LevelFilter::Info)
+        .init();
 
     info!("Starting network traffic monitor with Prometheus integration");
     info!("Interface: {}", args.interface);
-    info!("Metrics server port: {}", args.metrics_port);
-    if let Some(ref url) = args.prometheus_url {
-        info!("Prometheus URL: {}", url);
-        info!("Prometheus push interval: {} seconds", args.prometheus_interval);
-    }
 
     // ルート権限の確認
     if unsafe { libc::geteuid() } != 0 {
@@ -61,15 +32,54 @@ async fn main() -> Result<()> {
             "This program requires root privileges to capture network traffic"
         ));
     }
+    // 指定インターフェースのIPアドレスとサブネットマスクを表示
+    let (ip_addr, netmask) = match pnet_datalink::interfaces()
+        .into_iter()
+        .find(|iface| iface.name == args.interface)
+    {
+        Some(interface) => {
+            for ip in &interface.ips {
+                info!(
+                    "Interface {}: IP address = {}, netmask = {}",
+                    args.interface,
+                    ip.ip(),
+                    ip.mask()
+                );
+            }
+            // Use the first IP address for monitoring
+            if let Some(ip) = interface.ips.first() {
+                (ip.ip(), ip.mask())
+            } else {
+                return Err(anyhow::anyhow!(
+                    "No IP addresses found for interface '{}'",
+                    args.interface
+                ));
+            }
+        }
+        None => {
+            return Err(anyhow::anyhow!(
+                "Interface '{}' not found",
+                args.interface
+            ));
+        }
+    };
 
     // ネットワークモニタリングシステムを開始
+    let interface_name = args.interface.clone();
     let monitoring_task = tokio::spawn(async move {
-        if let Err(e) = start_network_monitoring_system(
-            &args.interface,
-            args.metrics_port,
-            args.prometheus_url.as_deref(),
-            args.prometheus_interval,
-        ).await {
+        let result = start_network_monitoring_system(
+            &interface_name,
+            Some(ip_addr),
+            Some(match netmask {
+                std::net::IpAddr::V4(v4) => v4,
+                std::net::IpAddr::V6(_) => {
+                    error!("IPv6 subnets not supported");
+                    return;
+                }
+            }),
+        ).await;
+        
+        if let Err(e) = result {
             error!("Network monitoring system failed: {}", e);
         }
     });

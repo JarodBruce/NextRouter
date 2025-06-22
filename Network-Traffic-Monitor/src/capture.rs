@@ -10,7 +10,7 @@ use std::sync::mpsc;
 use std::thread;
 use std::time::Duration;
 use std::sync::Arc;
-use prometheus::{Counter, Registry, TextEncoder, CounterVec};
+use prometheus::{Registry, TextEncoder};
 use tokio::time;
 use std::collections::HashMap;
 use crate::prometheus_server::start_prometheus_server;
@@ -39,11 +39,11 @@ pub struct PacketCapture {
 
 impl PacketCapture {
     /// 新しいPacketCaptureインスタンスを作成
-    pub fn new(interface_name: &str, packet_sender: mpsc::Sender<PacketInfo>) -> Result<Self> {
+    pub fn new(interface_name: &str, packet_sender: mpsc::Sender<PacketInfo>, local_ip: Option<IpAddr>, local_subnet: Option<Ipv4Addr>) -> Result<Self> {
         let interface = find_interface(interface_name)
             .context(format!("Failed to find interface: {}", interface_name))?;
 
-        let metrics = Arc::new(std::sync::Mutex::new(NetworkMetrics::new()));
+        let metrics = Arc::new(std::sync::Mutex::new(NetworkMetrics::new(local_ip, local_subnet)));
         let traffic_stats = Arc::new(std::sync::Mutex::new(TrafficStats::new(Duration::from_secs(10))));
         let ip_stats = Arc::new(std::sync::Mutex::new(HashMap::new()));
 
@@ -235,17 +235,14 @@ pub fn find_interface(name: &str) -> Result<NetworkInterface> {
     Err(anyhow::anyhow!("Interface '{}' not found", name))
 }
 
-/// 利用可能なネットワークインターフェースの一覧を取得
-pub fn list_interfaces() -> Vec<NetworkInterface> {
-    datalink::interfaces()
-}
-
 /// バックグラウンドでパケットキャプチャを開始する
 pub fn start_capture_background(
     interface_name: &str,
-    packet_sender: mpsc::Sender<PacketInfo>,
-) -> Result<(thread::JoinHandle<()>, Arc<std::sync::Mutex<NetworkMetrics>>, IpStatsMap)> {
-    let capture = PacketCapture::new(interface_name, packet_sender)?;
+    local_ip: Option<IpAddr>,
+    local_subnet: Option<Ipv4Addr>,
+) -> Result<(thread::JoinHandle<()>, Arc<std::sync::Mutex<NetworkMetrics>>, IpStatsMap, mpsc::Receiver<PacketInfo>)> {
+    let (packet_sender, packet_receiver) = mpsc::channel::<PacketInfo>();
+    let capture = PacketCapture::new(interface_name, packet_sender, local_ip, local_subnet)?;
     let metrics = capture.get_metrics();
     let ip_stats = capture.get_ip_stats();
     let interface_name = interface_name.to_string();
@@ -260,20 +257,17 @@ pub fn start_capture_background(
         info!("Packet capture stopped for interface: {}", interface_name);
     });
 
-    Ok((handle, metrics, ip_stats))
+    Ok((handle, metrics, ip_stats, packet_receiver))
 }
 
 /// 完全なネットワークモニタリングシステムを開始する
 pub async fn start_network_monitoring_system(
     interface_name: &str,
-    metrics_port: u16,
-    _prometheus_url: Option<&str>,
-    _prometheus_interval_secs: u64,
+    local_ip: Option<IpAddr>,
+    local_subnet: Option<Ipv4Addr>,
 ) -> Result<()> {
-    let (packet_sender, packet_receiver) = mpsc::channel::<PacketInfo>();
-    
     // パケットキャプチャを開始
-    let (_capture_handle, metrics, ip_stats) = start_capture_background(interface_name, packet_sender)?;
+    let (_capture_handle, metrics, ip_stats, packet_receiver) = start_capture_background(interface_name, local_ip, local_subnet)?;
     
     // ネットワークメトリクスをprometheusサーバーに設定
     crate::prometheus_server::set_network_metrics(metrics.clone());
@@ -281,11 +275,13 @@ pub async fn start_network_monitoring_system(
     // IP統計をprometheusサーバーに設定
     crate::prometheus_server::set_ip_stats(ip_stats.clone());
     
-    // Prometheusサーバーを起動（8080ポートで）
-    info!("Starting Prometheus metrics server on port: {}", metrics_port);
+    // Prometheusサーバーを起動（指定されたポートで）
+    const METRICS_PORT: u16 = 59121; // メトリクスサーバーのポート
+    info!("Starting Prometheus metrics server on port: {}", METRICS_PORT);
     tokio::spawn(async move {
-        if let Err(e) = start_prometheus_server(metrics_port).await {
+        if let Err(e) = start_prometheus_server(METRICS_PORT).await {
             error!("Prometheus server error: {}", e);
+            error!("Failed to start Prometheus server on port {}", METRICS_PORT);
         }
     });
     
@@ -370,7 +366,7 @@ impl LocalIpCounters {
 }
 
 impl NetworkMetrics {
-    pub fn new() -> Self {
+    pub fn new(local_ip: Option<IpAddr>, local_subnet: Option<Ipv4Addr>) -> Self {
         let registry = Registry::new();
         
         // ローカルIP別レートメトリクス（1秒間隔）
@@ -413,13 +409,15 @@ impl NetworkMetrics {
         registry.register(Box::new(total_tx_bytes_rate.clone())).unwrap();
         registry.register(Box::new(total_rx_bytes_rate.clone())).unwrap();
 
-        // デフォルトのローカルネットワーク範囲
-        let local_network_ranges = vec![
-            ("10.0.0.0".parse().unwrap(), 8),      // 10.0.0.0/8
-            ("172.16.0.0".parse().unwrap(), 12),   // 172.16.0.0/12
-            ("192.168.0.0".parse().unwrap(), 16),  // 192.168.0.0/16
-            ("127.0.0.0".parse().unwrap(), 8),     // 127.0.0.0/8 (localhost)
-        ];
+        // ローカルネットワーク範囲の構築
+        let local_network_ranges = Self::build_local_network_ranges(local_ip, local_subnet);
+
+        // 構築されたローカルネットワーク範囲を表示
+        info!("Configured local network ranges:");
+        for (network, prefix) in &local_network_ranges {
+            let (min_ip, max_ip) = Self::calculate_ip_range(*network, *prefix);
+            info!("  - {}/{} ({} - {})", network, prefix, min_ip, max_ip);
+        }
 
         NetworkMetrics {
             registry,
@@ -433,6 +431,37 @@ impl NetworkMetrics {
             last_update_time: std::time::Instant::now(),
             local_network_ranges,
         }
+    }
+
+    /// ローカルネットワーク範囲を構築する
+    fn build_local_network_ranges(local_ip: Option<IpAddr>, local_subnet: Option<Ipv4Addr>) -> Vec<(Ipv4Addr, u8)> {
+        let mut ranges = Vec::new();
+
+        // 提供されたローカルIPとサブネットがある場合、それを優先的に使用
+        if let (Some(IpAddr::V4(ipv4)), Some(subnet_mask)) = (local_ip, local_subnet) {
+            let network_addr = calculate_network_address(ipv4, subnet_mask);
+            let prefix_len = calculate_prefix_length(subnet_mask);
+            ranges.push((network_addr, prefix_len));
+            let (min_ip, max_ip) = Self::calculate_ip_range(network_addr, prefix_len);
+        }
+
+        ranges
+    }
+
+    /// ネットワークアドレスとプレフィックス長からIP範囲を計算
+    fn calculate_ip_range(network: Ipv4Addr, prefix_len: u8) -> (Ipv4Addr, Ipv4Addr) {
+        let network_u32 = u32::from(network);
+        let host_bits = 32 - prefix_len;
+        let mask = if host_bits >= 32 {
+            0
+        } else {
+            (1u32 << host_bits) - 1
+        };
+        
+        let min_ip = network_u32;
+        let max_ip = network_u32 | mask;
+        
+        (Ipv4Addr::from(min_ip), Ipv4Addr::from(max_ip))
     }
 
     /// IPアドレスがローカルネットワーク範囲内かどうかを判定
@@ -573,22 +602,6 @@ impl NetworkMetrics {
 
         self.last_update_time = now;
     }
-
-    /// ローカルIPごとの合計通信量を取得するヘルパーメソッド
-    pub fn get_local_ip_summary(&self) -> HashMap<String, (f64, f64, f64, f64)> {
-        let summary = HashMap::new();
-        
-        // CounterVecからメトリクスファミリーを取得して集計
-        // ここでは簡略化し、実際の実装では prometheus クレートの API を使用して
-        // 各 local_ip ラベルの値を集計する
-        
-        summary
-    }
-    
-    /// ローカルネットワーク範囲を更新する
-    pub fn update_local_networks(&mut self, ranges: Vec<(Ipv4Addr, u8)>) {
-        self.local_network_ranges = ranges;
-    }
 }
 
 /// 帯域幅計算のためのトラフィック統計
@@ -627,53 +640,17 @@ impl TrafficStats {
         self.bytes_in_window += bytes;
         self.last_update = now;
     }
-
-    pub fn get_bandwidth_bps(&self) -> f64 {
-        let now = std::time::Instant::now();
-        let elapsed = now.duration_since(self.window_start).as_secs_f64();
-        
-        if elapsed > 0.0 {
-            (self.bytes_in_window as f64 * 8.0) / elapsed
-        } else {
-            0.0
-        }
-    }
 }
 
 /// Prometheusメトリクスをログに出力する機能（簡素化版）
 pub async fn log_metrics_periodically(
-    metrics: Arc<std::sync::Mutex<NetworkMetrics>>,
+    _metrics: Arc<std::sync::Mutex<NetworkMetrics>>,
     interval_secs: u64,
 ) -> Result<()> {
     let mut interval = time::interval(Duration::from_secs(interval_secs));
 
     loop {
         interval.tick().await;
-        
-        if let Ok(metrics) = metrics.lock() {
-            let metrics_data = metrics.export();
-            
-            info!("=== Network Metrics (1s interval) ===");
-            
-            // 基本メトリクスを表示
-            let mut found_traffic = false;
-            for line in metrics_data.lines() {
-                if !line.starts_with('#') && !line.trim().is_empty() {
-                    if line.contains("local_ip_") {
-                        info!("{}", line);
-                        found_traffic = true;
-                    } else if line.contains("network_") && !line.contains("bandwidth") {
-                        info!("{}", line);
-                    }
-                }
-            }
-            
-            if !found_traffic {
-                info!("No local IP traffic detected yet...");
-            }
-            
-            info!("==========================================");
-        }
     }
 }
 
@@ -738,6 +715,33 @@ pub async fn update_ip_stats_rates_periodically(
         
         last_stats = current_snapshot;
     }
+}
+
+/// サブネットマスクからプレフィックス長を計算
+fn calculate_prefix_length(subnet_mask: Ipv4Addr) -> u8 {
+    let mask_u32 = u32::from(subnet_mask);
+    let mut prefix = 0;
+    let mut mask = 0x80000000u32;
+    
+    for _ in 0..32 {
+        if mask_u32 & mask != 0 {
+            prefix += 1;
+            mask >>= 1;
+        } else {
+            break;
+        }
+    }
+    
+    prefix
+}
+
+/// IPアドレスとサブネットマスクからネットワークアドレスを計算
+fn calculate_network_address(ip: Ipv4Addr, subnet_mask: Ipv4Addr) -> Ipv4Addr {
+    let ip_u32 = u32::from(ip);
+    let mask_u32 = u32::from(subnet_mask);
+    let network_u32 = ip_u32 & mask_u32;
+    
+    Ipv4Addr::from(network_u32)
 }
 
 

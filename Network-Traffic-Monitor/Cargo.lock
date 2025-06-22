@@ -586,6 +586,7 @@ dependencies = [
  "libc",
  "log",
  "pnet",
+ "pnet_datalink",
  "prometheus",
  "rand",
  "serde",
