@@ -9,7 +9,7 @@ use crossterm::{execute, terminal::{enable_raw_mode, disable_raw_mode}};
 use std::{io, time::{Duration, Instant}};
 
 /// CLI ダッシュボードを表示する関数
-pub fn cli_dashboard(count: usize, data_list: Vec<String>) -> Result<(), Box<dyn std::error::Error>> {
+pub fn cli_dashboard(title_text:&str, count: usize, data_list: Vec<String>) -> Result<(), Box<dyn std::error::Error>> {
     enable_raw_mode()?;
     let mut stdout = io::stdout();
     execute!(stdout, crossterm::terminal::EnterAlternateScreen)?;
@@ -35,7 +35,7 @@ pub fn cli_dashboard(count: usize, data_list: Vec<String>) -> Result<(), Box<dyn
                 .constraints(constraints)
                 .split(size);
 
-            let title = Paragraph::new("Dashboard")
+            let title = Paragraph::new(title_text.to_string())
                 .style(Style::default().fg(Color::Yellow));
             f.render_widget(title, chunks[0]);
 
@@ -59,21 +59,24 @@ pub fn cli_dashboard(count: usize, data_list: Vec<String>) -> Result<(), Box<dyn
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 使用例：cli_dashboard(データ数, データリスト)
     for i in 0..5 {
+        let value1 = [rand::random::<u32>() % 100, (i * 10) as u32];
+        let value2 = [rand::random::<u32>() % 50, (i * 5) as u32];
+        
         let data = vec![
-            format!("Item {}: {}", i, rand::random::<u32>() % 100),
-            format!("Value {}: {:.2}", i, rand::random::<f64>() * 100.0),
+            format!("Item{}:{} {}", i, value1[0], value1[1]),
+            format!("Value{}:{} {}", i, value2[0], value2[1]),
         ];
-        cli_dashboard(2, data)?;
+        cli_dashboard("cli", 2, data)?;
     }
     
-    // 別の例
+    // 別の例：より詳細なデータ形式
     // let custom_data = vec![
-    //     "Custom Data 1".to_string(),
-    //     "Custom Data 2".to_string(),
-    //     "Custom Data 3".to_string(),
-    //     "Custom Data 4".to_string(),
+    //     "CPU:85 %".to_string(),
+    //     "Memory:4096 MB".to_string(),
+    //     "Disk:250 GB".to_string(),
+    //     "Network:1024 KB/s".to_string(),
     // ];
-    // cli_dashboard(4, custom_data)?;
+    // cli_dashboard("System Monitor", 4, custom_data)?;
 
     Ok(())
 }

@@ -84,16 +84,43 @@ async fn main() -> Result<()> {
         }
     });
 
-    // シグナルハンドリング
-    tokio::select! {
+    // シグナルハンドリング（タイムアウト付き）
+    let result = tokio::select! {
         _ = signal::ctrl_c() => {
             info!("Received Ctrl+C, shutting down...");
+            Ok(())
         }
-        _ = monitoring_task => {
-            error!("Monitoring task ended unexpectedly");
+        result = monitoring_task => {
+            match result {
+                Ok(_) => {
+                    info!("Monitoring task completed successfully");
+                    Ok(())
+                }
+                Err(e) => {
+                    error!("Monitoring task panicked: {}", e);
+                    Err(anyhow::anyhow!("Task panicked: {}", e))
+                }
+            }
+        }
+        _ = tokio::time::sleep(tokio::time::Duration::from_secs(3600)) => {
+            info!("Timeout reached, shutting down...");
+            Ok(())
+        }
+    };
+
+    // クリーンアップのための短い待機時間
+    tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+    info!("Network traffic monitor stopped");
+    
+    // 結果を確認して適切に終了
+    match result {
+        Ok(_) => {
+            info!("Exiting gracefully");
+            std::process::exit(0);
+        }
+        Err(e) => {
+            error!("Exiting with error: {}", e);
+            std::process::exit(1);
         }
     }
-
-    info!("Network traffic monitor stopped");
-    Ok(())
 }
