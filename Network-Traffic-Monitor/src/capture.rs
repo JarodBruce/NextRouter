@@ -1,3 +1,5 @@
+use crate::prometheus_server::start_prometheus_server;
+use crate::stats::{IpStats, IpStatsMap};
 use anyhow::{Context, Result};
 use log::{error, info, warn};
 use pnet::datalink::{self, NetworkInterface};
@@ -5,17 +7,14 @@ use pnet::packet::ethernet::{EtherTypes, EthernetPacket};
 use pnet::packet::ipv4::Ipv4Packet;
 use pnet::packet::ipv6::Ipv6Packet;
 use pnet::packet::Packet;
+use prometheus::{Registry, TextEncoder};
+use std::collections::HashMap;
 use std::net::{IpAddr, Ipv4Addr};
 use std::sync::mpsc;
+use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
-use std::sync::Arc;
-use prometheus::{Registry, TextEncoder};
 use tokio::time;
-use std::collections::HashMap;
-use crate::prometheus_server::start_prometheus_server;
-use crate::stats::{IpStats, IpStatsMap};
-
 
 /// パケット情報を格納する構造体
 #[derive(Debug, Clone)]
@@ -40,12 +39,22 @@ pub struct PacketCapture {
 
 impl PacketCapture {
     /// 新しいPacketCaptureインスタンスを作成
-    pub fn new(interface_name: &str, packet_sender: mpsc::Sender<PacketInfo>, local_ip: Option<IpAddr>, local_subnet: Option<Ipv4Addr>) -> Result<Self> {
+    pub fn new(
+        interface_name: &str,
+        packet_sender: mpsc::Sender<PacketInfo>,
+        local_ip: Option<IpAddr>,
+        local_subnet: Option<Ipv4Addr>,
+    ) -> Result<Self> {
         let interface = find_interface(interface_name)
             .context(format!("Failed to find interface: {}", interface_name))?;
 
-        let metrics = Arc::new(std::sync::Mutex::new(NetworkMetrics::new(local_ip, local_subnet)));
-        let traffic_stats = Arc::new(std::sync::Mutex::new(TrafficStats::new(Duration::from_secs(10))));
+        let metrics = Arc::new(std::sync::Mutex::new(NetworkMetrics::new(
+            local_ip,
+            local_subnet,
+        )));
+        let traffic_stats = Arc::new(std::sync::Mutex::new(TrafficStats::new(
+            Duration::from_secs(10),
+        )));
         let ip_stats = Arc::new(std::sync::Mutex::new(HashMap::new()));
 
         Ok(Self {
@@ -69,7 +78,10 @@ impl PacketCapture {
 
     /// パケットキャプチャを開始
     pub fn start_capture(&self) -> Result<()> {
-        info!("Starting packet capture on interface: {}", self.interface.name);
+        info!(
+            "Starting packet capture on interface: {}",
+            self.interface.name
+        );
 
         // データリンクチャネルを作成
         let config = datalink::Config {
@@ -109,7 +121,7 @@ impl PacketCapture {
                         }
 
                         // debug!("Captured packet: {:?}", packet_info);
-                        
+
                         if let Err(e) = self.packet_sender.send(packet_info) {
                             error!("Failed to send packet info: {}", e);
                             break;
@@ -131,8 +143,14 @@ impl PacketCapture {
     }
 
     /// シャットダウンフラグ付きでパケットキャプチャを開始
-    pub fn start_capture_with_shutdown(&self, shutdown_flag: Arc<std::sync::atomic::AtomicBool>) -> Result<()> {
-        info!("Starting packet capture on interface: {}", self.interface.name);
+    pub fn start_capture_with_shutdown(
+        &self,
+        shutdown_flag: Arc<std::sync::atomic::AtomicBool>,
+    ) -> Result<()> {
+        info!(
+            "Starting packet capture on interface: {}",
+            self.interface.name
+        );
 
         // データリンクチャネルを作成
         let config = datalink::Config {
@@ -178,7 +196,7 @@ impl PacketCapture {
                         }
 
                         // debug!("Captured packet: {:?}", packet_info);
-                        
+
                         if let Err(e) = self.packet_sender.send(packet_info) {
                             error!("Failed to send packet info: {}", e);
                             break;
@@ -211,7 +229,7 @@ impl PacketCapture {
                 let stats = ip_stats.entry(dst_ip).or_default();
                 stats.rx_bytes += packet_info.size;
             }
-        } 
+        }
     }
 
     /// パケットを解析してPacketInfoを生成
@@ -288,7 +306,7 @@ impl PacketCapture {
 /// 指定された名前のネットワークインターフェースを検索
 pub fn find_interface(name: &str) -> Result<NetworkInterface> {
     let interfaces = datalink::interfaces();
-    
+
     // 完全一致での検索
     if let Some(interface) = interfaces.iter().find(|iface| iface.name == name) {
         return Ok(interface.clone());
@@ -308,7 +326,12 @@ pub fn start_capture_background(
     interface_name: &str,
     local_ip: Option<IpAddr>,
     local_subnet: Option<Ipv4Addr>,
-) -> Result<(Arc<std::sync::atomic::AtomicBool>, Arc<std::sync::Mutex<NetworkMetrics>>, IpStatsMap, mpsc::Receiver<PacketInfo>)> {
+) -> Result<(
+    Arc<std::sync::atomic::AtomicBool>,
+    Arc<std::sync::Mutex<NetworkMetrics>>,
+    IpStatsMap,
+    mpsc::Receiver<PacketInfo>,
+)> {
     let (packet_sender, packet_receiver) = mpsc::channel::<PacketInfo>();
     let capture = PacketCapture::new(interface_name, packet_sender, local_ip, local_subnet)?;
     let metrics = capture.get_metrics();
@@ -320,13 +343,19 @@ pub fn start_capture_background(
     let shutdown_flag_clone = shutdown_flag.clone();
 
     thread::spawn(move || {
-        info!("Starting background packet capture for interface: {}", interface_name);
-        
+        info!(
+            "Starting background packet capture for interface: {}",
+            interface_name
+        );
+
         // タイムアウト付きのパケットキャプチャを実行
         if let Err(e) = capture.start_capture_with_shutdown(shutdown_flag_clone) {
-            error!("Packet capture failed for interface {}: {}", interface_name, e);
+            error!(
+                "Packet capture failed for interface {}: {}",
+                interface_name, e
+            );
         }
-        
+
         info!("Packet capture stopped for interface: {}", interface_name);
     });
 
@@ -340,26 +369,33 @@ pub async fn start_network_monitoring_system(
     local_subnet: Option<Ipv4Addr>,
 ) -> Result<()> {
     // パケットキャプチャを開始
-    let (capture_shutdown_flag, metrics, ip_stats, packet_receiver) = start_capture_background(interface_name, local_ip, local_subnet)?;
-    
+    let (capture_shutdown_flag, metrics, ip_stats, packet_receiver) =
+        start_capture_background(interface_name, local_ip, local_subnet)?;
+
     // ネットワークメトリクスをprometheusサーバーに設定
     crate::prometheus_server::set_network_metrics(metrics.clone());
-    
+
     // IP統計をprometheusサーバーに設定
     crate::prometheus_server::set_ip_stats(ip_stats.clone());
-    
+
     // Prometheusサーバーを起動（指定されたポートで）
     const METRICS_PORT: u16 = 59121; // メトリクスサーバーのポート
-    info!("Starting Prometheus metrics server on port: {}", METRICS_PORT);
+    info!(
+        "Starting Prometheus metrics server on port: {}",
+        METRICS_PORT
+    );
     let prometheus_handle = tokio::spawn(async move {
         if let Err(e) = start_prometheus_server(METRICS_PORT).await {
             error!("Prometheus server error: {}", e);
             error!("Failed to start Prometheus server on port {}", METRICS_PORT);
         }
     });
-    
-    info!("Network monitoring started on interface: {}", interface_name);
-    
+
+    info!(
+        "Network monitoring started on interface: {}",
+        interface_name
+    );
+
     // メトリクスのログ出力を開始（1秒間隔）
     let metrics_logger = metrics.clone();
     let log_handle = tokio::spawn(async move {
@@ -385,7 +421,7 @@ pub async fn start_network_monitoring_system(
 
     // パケット処理ループ（メイン処理）
     let mut _packet_count = 0u64;
-    
+
     loop {
         tokio::select! {
             _ = tokio::time::sleep(Duration::from_millis(10)) => {
@@ -405,10 +441,10 @@ pub async fn start_network_monitoring_system(
             }
             _ = tokio::signal::ctrl_c() => {
                 info!("Shutdown signal received in monitoring system");
-                
+
                 // パケットキャプチャスレッドを停止
                 capture_shutdown_flag.store(true, std::sync::atomic::Ordering::Relaxed);
-                
+
                 // 少し待ってからループを抜ける
                 tokio::time::sleep(Duration::from_millis(100)).await;
                 break;
@@ -425,7 +461,7 @@ pub async fn start_network_monitoring_system(
 
     // タスクの終了を少し待つ
     tokio::time::sleep(Duration::from_millis(200)).await;
-    
+
     info!("All monitoring tasks stopped");
     Ok(())
 }
@@ -435,11 +471,11 @@ pub async fn start_network_monitoring_system(
 pub struct NetworkMetrics {
     registry: Registry,
     // ローカルIP別レートメトリクス（1秒間隔）
-    pub local_ip_tx_bytes_rate: prometheus::GaugeVec,  // 送信バイト数レート（ローカルIP別）
-    pub local_ip_rx_bytes_rate: prometheus::GaugeVec,  // 受信バイト数レート（ローカルIP別）
+    pub local_ip_tx_bytes_rate: prometheus::GaugeVec, // 送信バイト数レート（ローカルIP別）
+    pub local_ip_rx_bytes_rate: prometheus::GaugeVec, // 受信バイト数レート（ローカルIP別）
     // 合計値用メトリクス
-    pub total_tx_bytes_rate: prometheus::Gauge,  // 全ローカルIPの送信バイト数レート合計
-    pub total_rx_bytes_rate: prometheus::Gauge,  // 全ローカルIPの受信バイト数レート合計
+    pub total_tx_bytes_rate: prometheus::Gauge, // 全ローカルIPの送信バイト数レート合計
+    pub total_rx_bytes_rate: prometheus::Gauge, // 全ローカルIPの受信バイト数レート合計
     // IP別内部カウンタ（差分計算用）
     pub internal_counters_per_ip: HashMap<String, LocalIpCounters>,
     pub last_update_time: std::time::Instant,
@@ -486,34 +522,52 @@ pub fn format_bps(value: f64) -> String {
 impl NetworkMetrics {
     pub fn new(local_ip: Option<IpAddr>, local_subnet: Option<Ipv4Addr>) -> Self {
         let registry = Registry::new();
-        
+
         // ローカルIP別レートメトリクス（1秒間隔）
         let local_ip_tx_bytes_rate = prometheus::GaugeVec::new(
-            prometheus::Opts::new("local_ip_tx_bytes_rate", "Current transmission rate in bytes/sec per local IP"),
-            &["local_ip"]
-        ).unwrap();
-        
+            prometheus::Opts::new(
+                "local_ip_tx_bytes_rate",
+                "Current transmission rate in bytes/sec per local IP",
+            ),
+            &["local_ip"],
+        )
+        .unwrap();
+
         let local_ip_rx_bytes_rate = prometheus::GaugeVec::new(
-            prometheus::Opts::new("local_ip_rx_bytes_rate", "Current reception rate in bytes/sec per local IP"),
-            &["local_ip"]
-        ).unwrap();
+            prometheus::Opts::new(
+                "local_ip_rx_bytes_rate",
+                "Current reception rate in bytes/sec per local IP",
+            ),
+            &["local_ip"],
+        )
+        .unwrap();
 
         // 合計値用メトリクス
         let total_tx_bytes_rate = prometheus::Gauge::new(
             "total_tx_bytes_rate",
             "Total transmission rate in bytes/sec for all local IPs",
-        ).unwrap();
-        
+        )
+        .unwrap();
+
         let total_rx_bytes_rate = prometheus::Gauge::new(
             "total_rx_bytes_rate",
             "Total reception rate in bytes/sec for all local IPs",
-        ).unwrap();
+        )
+        .unwrap();
 
         // レジストリにメトリクスを登録
-        registry.register(Box::new(local_ip_tx_bytes_rate.clone())).unwrap();
-        registry.register(Box::new(local_ip_rx_bytes_rate.clone())).unwrap();
-        registry.register(Box::new(total_tx_bytes_rate.clone())).unwrap();
-        registry.register(Box::new(total_rx_bytes_rate.clone())).unwrap();
+        registry
+            .register(Box::new(local_ip_tx_bytes_rate.clone()))
+            .unwrap();
+        registry
+            .register(Box::new(local_ip_rx_bytes_rate.clone()))
+            .unwrap();
+        registry
+            .register(Box::new(total_tx_bytes_rate.clone()))
+            .unwrap();
+        registry
+            .register(Box::new(total_rx_bytes_rate.clone()))
+            .unwrap();
 
         // ローカルネットワーク範囲の構築
         let local_network_ranges = Self::build_local_network_ranges(local_ip, local_subnet);
@@ -538,7 +592,10 @@ impl NetworkMetrics {
     }
 
     /// ローカルネットワーク範囲を構築する
-    fn build_local_network_ranges(local_ip: Option<IpAddr>, local_subnet: Option<Ipv4Addr>) -> Vec<(Ipv4Addr, u8)> {
+    fn build_local_network_ranges(
+        local_ip: Option<IpAddr>,
+        local_subnet: Option<Ipv4Addr>,
+    ) -> Vec<(Ipv4Addr, u8)> {
         let mut ranges = Vec::new();
 
         // 提供されたローカルIPとサブネットがある場合、それを優先的に使用
@@ -561,10 +618,10 @@ impl NetworkMetrics {
         } else {
             (1u32 << host_bits) - 1
         };
-        
+
         let min_ip = network_u32;
         let max_ip = network_u32 | mask;
-        
+
         (Ipv4Addr::from(min_ip), Ipv4Addr::from(max_ip))
     }
 
@@ -592,10 +649,10 @@ impl NetworkMetrics {
         } else {
             !((1u32 << (32 - prefix_len)) - 1)
         };
-        
+
         let ip_u32 = u32::from(ip);
         let network_u32 = u32::from(network);
-        
+
         (ip_u32 & mask) == (network_u32 & mask)
     }
 
@@ -606,7 +663,10 @@ impl NetworkMetrics {
             IpAddr::V6(ipv6) => {
                 // IPv6の場合、プレフィックスのみを使用（プライバシー考慮）
                 let segments = ipv6.segments();
-                format!("{:x}:{:x}:{:x}:{:x}::", segments[0], segments[1], segments[2], segments[3])
+                format!(
+                    "{:x}:{:x}:{:x}:{:x}::",
+                    segments[0], segments[1], segments[2], segments[3]
+                )
             }
         }
     }
@@ -620,14 +680,20 @@ impl NetworkMetrics {
             if src_is_local && !dst_is_local {
                 // ローカルIPから外部への送信
                 let local_ip_str = self.ip_to_string(src_ip);
-                
-                let counters = self.internal_counters_per_ip.entry(local_ip_str).or_insert_with(LocalIpCounters::new);
+
+                let counters = self
+                    .internal_counters_per_ip
+                    .entry(local_ip_str)
+                    .or_insert_with(LocalIpCounters::new);
                 counters.tx_bytes += packet_info.size;
             } else if !src_is_local && dst_is_local {
                 // 外部からローカルIPへの受信
                 let local_ip_str = self.ip_to_string(dst_ip);
-                
-                let counters = self.internal_counters_per_ip.entry(local_ip_str).or_insert_with(LocalIpCounters::new);
+
+                let counters = self
+                    .internal_counters_per_ip
+                    .entry(local_ip_str)
+                    .or_insert_with(LocalIpCounters::new);
                 counters.rx_bytes += packet_info.size;
             }
         }
@@ -643,7 +709,7 @@ impl NetworkMetrics {
     pub fn update_rate_metrics(&mut self) -> Result<(), Box<dyn std::error::Error>> {
         let now = std::time::Instant::now();
         let elapsed_secs = now.duration_since(self.last_update_time).as_secs_f64();
-        
+
         // 最小間隔チェック（1秒未満は無視）
         if elapsed_secs < 1.0 {
             return Ok(());
@@ -680,19 +746,26 @@ impl NetworkMetrics {
             counters.last_rx_bytes = counters.rx_bytes;
 
             // ローカルIPのログ出力
-            info!("Local IP {} - TX: {}, RX: {}", local_ip, format_bps(tx_bytes_rate * 8.0), format_bps(rx_bytes_rate * 8.0));
-
+            info!(
+                "Local IP {} - TX: {}, RX: {}",
+                local_ip,
+                format_bps(tx_bytes_rate * 8.0),
+                format_bps(rx_bytes_rate * 8.0)
+            );
         }
 
         // 合計値メトリクスを設定
         self.total_tx_bytes_rate.set(total_tx_bytes_rate);
         self.total_rx_bytes_rate.set(total_rx_bytes_rate);
-        info!("Network Summary - Total TX: {}, Total RX: {}", format_bps(total_tx_bytes_rate * 8.0), format_bps(total_rx_bytes_rate * 8.0));
+        info!(
+            "Network Summary - Total TX: {}, Total RX: {}",
+            format_bps(total_tx_bytes_rate * 8.0),
+            format_bps(total_rx_bytes_rate * 8.0)
+        );
 
         self.last_update_time = now;
         Ok(())
     }
-
 }
 
 /// 帯域幅計算のためのトラフィック統計
@@ -719,15 +792,15 @@ impl TrafficStats {
 
     pub fn add_bytes(&mut self, bytes: u64) {
         self.total_bytes += bytes;
-        
+
         let now = std::time::Instant::now();
-        
+
         // ウィンドウをリセットする必要があるか確認
         if now.duration_since(self.window_start) >= self.window_duration {
             self.bytes_in_window = 0;
             self.window_start = now;
         }
-        
+
         self.bytes_in_window += bytes;
         self.last_update = now;
     }
@@ -751,7 +824,7 @@ pub async fn log_metrics_periodically(
             }
         }
     }
-    
+
     Ok(())
 }
 
@@ -776,17 +849,15 @@ pub async fn update_rate_metrics_periodically(
             }
         }
     }
-    
+
     Ok(())
 }
 
 /// IP統計のレートを定期的に更新する関数
-pub async fn update_ip_stats_rates_periodically(
-    ip_stats: IpStatsMap,
-) -> Result<()> {
+pub async fn update_ip_stats_rates_periodically(ip_stats: IpStatsMap) -> Result<()> {
     let mut interval = time::interval(Duration::from_secs(1));
     let mut last_stats: HashMap<IpAddr, IpStats> = HashMap::new();
-    
+
     loop {
         tokio::select! {
             _ = interval.tick() => {
@@ -797,7 +868,7 @@ pub async fn update_ip_stats_rates_periodically(
                     warn!("Failed to acquire IP stats lock for rate calculation");
                     continue;
                 };
-                
+
                 // レート計算（ロック外で実行）
                 let mut updated_rates: HashMap<IpAddr, (u64, u64)> = HashMap::new();
                 for (ip, stats) in &current_snapshot {
@@ -806,7 +877,7 @@ pub async fn update_ip_stats_rates_periodically(
                         let rx_bytes_rate = stats.rx_bytes.saturating_sub(last.rx_bytes);
                         updated_rates.insert(*ip, (tx_bytes_rate, rx_bytes_rate));
                     }
-                }     
+                }
                 last_stats = current_snapshot;
             }
             _ = tokio::signal::ctrl_c() => {
@@ -815,7 +886,7 @@ pub async fn update_ip_stats_rates_periodically(
             }
         }
     }
-    
+
     Ok(())
 }
 
@@ -824,7 +895,7 @@ fn calculate_prefix_length(subnet_mask: Ipv4Addr) -> u8 {
     let mask_u32 = u32::from(subnet_mask);
     let mut prefix = 0;
     let mut mask = 0x80000000u32;
-    
+
     for _ in 0..32 {
         if mask_u32 & mask != 0 {
             prefix += 1;
@@ -833,7 +904,7 @@ fn calculate_prefix_length(subnet_mask: Ipv4Addr) -> u8 {
             break;
         }
     }
-    
+
     prefix
 }
 
@@ -842,6 +913,6 @@ fn calculate_network_address(ip: Ipv4Addr, subnet_mask: Ipv4Addr) -> Ipv4Addr {
     let ip_u32 = u32::from(ip);
     let mask_u32 = u32::from(subnet_mask);
     let network_u32 = ip_u32 & mask_u32;
-    
+
     Ipv4Addr::from(network_u32)
 }

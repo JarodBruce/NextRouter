@@ -1,6 +1,6 @@
 mod capture;
-mod stats;
 mod prometheus_server;
+mod stats;
 
 use anyhow::Result;
 use capture::start_network_monitoring_system;
@@ -57,10 +57,7 @@ async fn main() -> Result<()> {
             }
         }
         None => {
-            return Err(anyhow::anyhow!(
-                "Interface '{}' not found",
-                args.interface
-            ));
+            return Err(anyhow::anyhow!("Interface '{}' not found", args.interface));
         }
     };
 
@@ -77,8 +74,9 @@ async fn main() -> Result<()> {
                     return;
                 }
             }),
-        ).await;
-        
+        )
+        .await;
+
         if let Err(e) = result {
             error!("Network monitoring system failed: {}", e);
         }
@@ -111,7 +109,7 @@ async fn main() -> Result<()> {
     // クリーンアップのための短い待機時間
     tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
     info!("Network traffic monitor stopped");
-    
+
     // 結果を確認して適切に終了
     match result {
         Ok(_) => {
