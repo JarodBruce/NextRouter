@@ -551,6 +551,8 @@ impl NetworkMetrics {
         let mut total_tx_bytes_rate = 0.0;
         let mut total_rx_bytes_rate = 0.0;
 
+        info!("count local_ip: {}", self.internal_counters_per_ip.len());
+
         // 各ローカルIPのレートを計算して更新
         for (local_ip, counters) in self.internal_counters_per_ip.iter_mut() {
             // 差分計算
@@ -589,11 +591,8 @@ impl NetworkMetrics {
             counters.last_tx_packets = counters.tx_packets;
             counters.last_rx_packets = counters.rx_packets;
 
-            // ログ出力（トラフィックがある場合のみ）
-            if tx_bytes_diff > 0 || rx_bytes_diff > 0 {
-                info!("Local IP {} - TX: {:.1} bytes/s, RX: {:.1} bytes/s", 
-                      local_ip, tx_bytes_rate, rx_bytes_rate);
-            }
+            // ローカルIPのログ出力
+            info!("Local IP {} - TX: {:.1} bytes/s, RX: {:.1} bytes/s",local_ip, tx_bytes_rate, rx_bytes_rate);
         }
 
         // 合計値メトリクスを設定

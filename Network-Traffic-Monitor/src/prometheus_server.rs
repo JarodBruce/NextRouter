@@ -96,28 +96,39 @@ async fn handle_request(
             // IP統計情報を取得
             let ip_stats_output = if let Some(ip_stats) = IP_STATS.get() {
                 if let Ok(ip_stats) = ip_stats.lock() {
-                    let encoder = TextEncoder::new();
+                    // IP統計が空でない場合のみメトリクスを生成
+                    if !ip_stats.is_empty() {
+                        let encoder = TextEncoder::new();
 
-                    let local_ip_tx_bytes = GaugeVec::new(prometheus::Opts::new("local_ip_tx_bytes_per_sec", "Transmit bytes per second for each local IP"), &["local_ip"]).unwrap();
-                    let local_ip_rx_bytes = GaugeVec::new(prometheus::Opts::new("local_ip_rx_bytes_per_sec", "Receive bytes per second for each local IP"), &["local_ip"]).unwrap();
-                    let local_ip_tx_packets = GaugeVec::new(prometheus::Opts::new("local_ip_tx_packets_per_sec", "Transmit packets per second for each local IP"), &["local_ip"]).unwrap();
-                    let local_ip_rx_packets = GaugeVec::new(prometheus::Opts::new("local_ip_rx_packets_per_sec", "Receive packets per second for each local IP"), &["local_ip"]).unwrap();
+                        let local_ip_tx_bytes = GaugeVec::new(prometheus::Opts::new("local_ip_tx_bytes_per_sec", "Transmit bytes per second for each local IP"), &["local_ip"]).unwrap();
+                        let local_ip_rx_bytes = GaugeVec::new(prometheus::Opts::new("local_ip_rx_bytes_per_sec", "Receive bytes per second for each local IP"), &["local_ip"]).unwrap();
+                        let local_ip_tx_packets = GaugeVec::new(prometheus::Opts::new("local_ip_tx_packets_per_sec", "Transmit packets per second for each local IP"), &["local_ip"]).unwrap();
+                        let local_ip_rx_packets = GaugeVec::new(prometheus::Opts::new("local_ip_rx_packets_per_sec", "Receive packets per second for each local IP"), &["local_ip"]).unwrap();
 
-                    for (ip, stats) in ip_stats.iter() {
-                        let ip_str = ip.to_string();
-                        local_ip_tx_bytes.with_label_values(&[&ip_str]).set(stats.tx_bytes_per_sec as f64);
-                        local_ip_rx_bytes.with_label_values(&[&ip_str]).set(stats.rx_bytes_per_sec as f64);
-                        local_ip_tx_packets.with_label_values(&[&ip_str]).set(stats.tx_packets_per_sec as f64);
-                        local_ip_rx_packets.with_label_values(&[&ip_str]).set(stats.rx_packets_per_sec as f64);
+                        for (ip, stats) in ip_stats.iter() {
+                            let ip_str = ip.to_string();
+                            local_ip_tx_bytes.with_label_values(&[&ip_str]).set(stats.tx_bytes_per_sec as f64);
+                            local_ip_rx_bytes.with_label_values(&[&ip_str]).set(stats.rx_bytes_per_sec as f64);
+                            local_ip_tx_packets.with_label_values(&[&ip_str]).set(stats.tx_packets_per_sec as f64);
+                            local_ip_rx_packets.with_label_values(&[&ip_str]).set(stats.rx_packets_per_sec as f64);
+                        }
+                        
+                        let mut metric_families = vec![];
+                        metric_families.extend(local_ip_tx_bytes.collect());
+                        metric_families.extend(local_ip_rx_bytes.collect());
+                        metric_families.extend(local_ip_tx_packets.collect());
+                        metric_families.extend(local_ip_rx_packets.collect());
+
+                        match encoder.encode_to_string(&metric_families) {
+                            Ok(output) => output,
+                            Err(e) => {
+                                eprintln!("Error encoding IP stats metrics: {}", e);
+                                String::new()
+                            }
+                        }
+                    } else {
+                        String::new()
                     }
-                    
-                    let mut metric_families = vec![];
-                    metric_families.extend(local_ip_tx_bytes.collect());
-                    metric_families.extend(local_ip_rx_bytes.collect());
-                    metric_families.extend(local_ip_tx_packets.collect());
-                    metric_families.extend(local_ip_rx_packets.collect());
-
-                    encoder.encode_to_string(&metric_families).unwrap()
                 } else {
                     String::new()
                 }
