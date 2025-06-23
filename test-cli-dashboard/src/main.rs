@@ -9,10 +9,6 @@ use crossterm::{execute, terminal::{enable_raw_mode, disable_raw_mode}};
 use std::{io, time::{Duration, Instant}};
 
 /// CLI ダッシュボードを表示する関数
-/// 
-/// # 引数
-/// * `count` - 表示するデータ項目数
-/// * `data_list` - 表示するデータのリスト
 pub fn cli_dashboard(count: usize, data_list: Vec<String>) -> Result<(), Box<dyn std::error::Error>> {
     enable_raw_mode()?;
     let mut stdout = io::stdout();
@@ -21,7 +17,7 @@ pub fn cli_dashboard(count: usize, data_list: Vec<String>) -> Result<(), Box<dyn
     let mut terminal = Terminal::new(backend)?;
 
     let start_time = Instant::now();
-    let duration = Duration::from_secs(5);
+    let duration = Duration::from_millis(1);
 
     while start_time.elapsed() < duration {
         terminal.draw(|f| {
@@ -62,12 +58,13 @@ pub fn cli_dashboard(count: usize, data_list: Vec<String>) -> Result<(), Box<dyn
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 使用例：cli_dashboard(データ数, データリスト)
-    let data = vec![
-        format!("Number: {}", rand::random::<u32>() % 1000),
-        format!("Float: {:.2}", rand::random::<f64>() * 100.0),
-        format!("Percent: {:.1}%", rand::random::<f64>() * 100.0),
-    ];
-    cli_dashboard(3, data)?;
+    for i in 0..5 {
+        let data = vec![
+            format!("Item {}: {}", i, rand::random::<u32>() % 100),
+            format!("Value {}: {:.2}", i, rand::random::<f64>() * 100.0),
+        ];
+        cli_dashboard(2, data)?;
+    }
     
     // 別の例
     // let custom_data = vec![
