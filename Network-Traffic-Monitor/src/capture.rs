@@ -466,6 +466,23 @@ impl LocalIpCounters {
     }
 }
 
+/// 数値（bps単位）を適切な単位（bps, Kbps, Mbps, Gbps）に変換して文字列で返す
+pub fn format_bps(value: f64) -> String {
+    const KBPS: f64 = 1_000.0;
+    const MBPS: f64 = 1_000_000.0;
+    const GBPS: f64 = 1_000_000_000.0;
+
+    if value >= GBPS {
+        format!("{:.2} Gbps", value / GBPS)
+    } else if value >= MBPS {
+        format!("{:.2} Mbps", value / MBPS)
+    } else if value >= KBPS {
+        format!("{:.2} Kbps", value / KBPS)
+    } else {
+        format!("{:.0} bps", value)
+    }
+}
+
 impl NetworkMetrics {
     pub fn new(local_ip: Option<IpAddr>, local_subnet: Option<Ipv4Addr>) -> Self {
         let registry = Registry::new();
@@ -663,14 +680,14 @@ impl NetworkMetrics {
             counters.last_rx_bytes = counters.rx_bytes;
 
             // ローカルIPのログ出力
-            info!("Local IP {} - TX: {:.1} bytes/s, RX: {:.1} bytes/s",local_ip, tx_bytes_rate, rx_bytes_rate);
+            info!("Local IP {} - TX: {}, RX: {}", local_ip, format_bps(tx_bytes_rate * 8.0), format_bps(rx_bytes_rate * 8.0));
 
         }
 
         // 合計値メトリクスを設定
         self.total_tx_bytes_rate.set(total_tx_bytes_rate);
         self.total_rx_bytes_rate.set(total_rx_bytes_rate);
-        info!("Network Summary - Total TX: {:.1} bytes/s, Total RX: {:.1} bytes/s",  total_tx_bytes_rate, total_rx_bytes_rate);
+        info!("Network Summary - Total TX: {}, Total RX: {}", format_bps(total_tx_bytes_rate * 8.0), format_bps(total_rx_bytes_rate * 8.0));
 
         self.last_update_time = now;
         Ok(())
@@ -789,20 +806,7 @@ pub async fn update_ip_stats_rates_periodically(
                         let rx_bytes_rate = stats.rx_bytes.saturating_sub(last.rx_bytes);
                         updated_rates.insert(*ip, (tx_bytes_rate, rx_bytes_rate));
                     }
-                }
-                
-                // 短時間でレートを更新
-                if let Ok(mut current_stats) = ip_stats.lock() {
-                    for (ip, (tx_bytes_rate, rx_bytes_rate)) in updated_rates {
-                        if let Some(stats) = current_stats.get_mut(&ip) {
-                            stats.tx_bytes_per_sec = tx_bytes_rate;
-                            stats.rx_bytes_per_sec = rx_bytes_rate;
-                        }
-                    }
-                } else {
-                    warn!("Failed to acquire IP stats lock for rate update");
-                }
-                
+                }     
                 last_stats = current_snapshot;
             }
             _ = tokio::signal::ctrl_c() => {

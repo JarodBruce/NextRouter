@@ -45,12 +45,6 @@ pub struct ProtocolStats {
 pub struct IpStats {
     pub tx_bytes: u64,
     pub rx_bytes: u64,
-    pub tx_packets: u64,
-    pub rx_packets: u64,
-    pub tx_bytes_per_sec: u64,
-    pub rx_bytes_per_sec: u64,
-    pub tx_packets_per_sec: u64,
-    pub rx_packets_per_sec: u64,
 }
 
 pub type IpStatsMap = Arc<Mutex<HashMap<IpAddr, IpStats>>>;
