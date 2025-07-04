@@ -1,0 +1,39 @@
+flush ruleset
+
+table inet filter {
+    chain input {
+        type filter hook input priority 0; policy drop;
+        iif lo accept
+        ct state established,related accept
+        iifname "$LAN_INTERFACE" accept
+        tcp dport 22 accept
+        iifname "$LAN_INTERFACE" udp dport 67 accept
+        iifname "$LAN_INTERFACE" udp dport 53 accept
+        iifname "$LAN_INTERFACE" tcp dport 53 accept
+        icmp type echo-request accept
+        ip saddr "${LAN_IPV4_NETWORK}" accept
+    }
+    chain forward {
+        type filter hook forward priority 0; policy drop;
+        ct state established,related accept
+        iifname "$LAN_INTERFACE" oifname "$WAN_INTERFACE" accept
+        iifname "$WAN_INTERFACE" oifname "$LAN_INTERFACE" ct state established,related accept
+        icmp type echo-request accept
+        icmp type echo-reply accept
+        ip saddr "${LAN_IPV4_NETWORK}" accept
+    }
+    chain output {
+        type filter hook output priority 0; policy accept;
+        oif lo accept
+    }
+}
+
+table inet nat {
+    chain prerouting {
+        type nat hook prerouting priority -100;
+    }
+    chain postrouting {
+        type nat hook postrouting priority 100;
+        oifname "$WAN_INTERFACE" ip saddr "${LAN_IPV4_NETWORK}" masquerade
+    }
+}

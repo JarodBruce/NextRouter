@@ -8,7 +8,6 @@ LAN_INTERFACE="${2}"     # LAN (internal network)
 # === Network Settings ===
 LAN_IPV4_NETWORK="10.40.0.0/24"        # LAN IPv4 network
 LAN_IPV4_GATEWAY="10.40.0.1/24"        # LAN IPv4 gateway
-# IPv6 is dynamically set by DHCP-PD (Prefix Delegation)
 DHCP_IPV4_START="10.40.0.100"          # DHCP IPv4 start address
 DHCP_IPV4_END="10.40.0.200"            # DHCP IPv4 end address
 
@@ -44,14 +43,8 @@ fi
 
 echo "Step 1: Installing required packages..."
 # Install required packages
-echo "  - nftables..."
 if ! command -v nft &> /dev/null; then
-    apt update && apt install -y nftables
-fi
-
-echo "  - dnsmasq (DHCPv4 server)..."
-if ! command -v dnsmasq &> /dev/null; then
-    apt update && apt install -y dnsmasq
+    apt update && apt install -y nftables dnsmasq
 fi
 
 # Stop and disable unnecessary services
@@ -102,59 +95,10 @@ nft flush ruleset
 
 echo ""
 echo "Step 4: Configuring nftables firewall..."
-# Create tables and chains
-echo "  Creating basic tables and chains..."
-nft add table inet filter
-nft add table inet nat
-
-# Create filter table chains
-nft add chain inet filter input { type filter hook input priority 0\; policy drop\; }
-nft add chain inet filter forward { type filter hook forward priority 0\; policy drop\; }
-nft add chain inet filter output { type filter hook output priority 0\; policy accept\; }
-
-# Create NAT table chains
-nft add chain inet nat prerouting { type nat hook prerouting priority -100\; }
-nft add chain inet nat postrouting { type nat hook postrouting priority 100\; }
-
-echo "  Setting up basic firewall rules..."
-
-# Allow local loopback
-nft add rule inet filter input iif lo accept
-nft add rule inet filter output oif lo accept
-
-# Allow established and related connections
-nft add rule inet filter input ct state established,related accept
-nft add rule inet filter forward ct state established,related accept
-
-# Allow input from LAN
-nft add rule inet filter input iif "$LAN_INTERFACE" accept
-
-# Allow forwarding from LAN to WAN (important)
-nft add rule inet filter forward iif "$LAN_INTERFACE" oif "$WAN_INTERFACE" accept
-# Allow responses from WAN to LAN (important)
-nft add rule inet filter forward iif "$WAN_INTERFACE" oif "$LAN_INTERFACE" ct state established,related accept
-
-# Allow SSH connections (if needed)
-nft add rule inet filter input tcp dport 22 accept
-
-# Allow DHCP (from LAN)
-nft add rule inet filter input iif "$LAN_INTERFACE" udp dport 67 accept
-
-# Allow DNS forwarding
-nft add rule inet filter input iif "$LAN_INTERFACE" udp dport 53 accept
-nft add rule inet filter input iif "$LAN_INTERFACE" tcp dport 53 accept
-
-# Allow ICMP (ping)
-nft add rule inet filter input icmp type echo-request accept
-nft add rule inet filter forward icmp type echo-request accept
-nft add rule inet filter forward icmp type echo-reply accept
-
-# NAT configuration - masquerade LAN to WAN
-nft add rule inet nat postrouting oif "$WAN_INTERFACE" ip saddr "${LAN_IPV4_NETWORK}" masquerade
-
-# Additional LAN network settings
-nft add rule inet filter input ip saddr "${LAN_IPV4_NETWORK}" accept
-nft add rule inet filter forward ip saddr "${LAN_IPV4_NETWORK}" accept
+# Load nftables rules from file
+echo "  Loading nftables rules from /etc/nftables/rules.nft..."
+# Substitute variables in the template file and load it
+envsubst < /etc/nftables/rules.nft | nft -f -
 
 echo "  Saving nftables configuration..."
 # Save configuration
@@ -205,43 +149,6 @@ sysctl -p
 
 echo ""
 echo "Step 7: Configuring DHCP/DNS server (dnsmasq)..."
-# Install radvd (IPv6 Router Advertisement) if needed
-if ! command -v radvd &> /dev/null; then
-    echo "  Installing radvd (for IPv6 Router Advertisement, not used in IPv4 mode)..."
-    apt update && apt install -y radvd
-fi
-
-# Create radvd config file if WAN_PREFIX is set
-if [ -n "$WAN_PREFIX" ]; then
-    BASE_PREFIX=$(echo "$WAN_PREFIX" | cut -d: -f1-4)
-    echo "  Creating radvd config file..."
-    cat > /etc/radvd.conf << EOF
-# Router Advertisement config for IPv6 bridge
-interface $IPV6_BRIDGE {
-    AdvSendAdvert on;
-    MinRtrAdvInterval 30;
-    MaxRtrAdvInterval 600;
-    
-    prefix ${BASE_PREFIX}::/64 {
-        AdvOnLink on;
-        AdvAutonomous on;
-        AdvRouterAddr on;
-    };
-    
-    RDNSS 2001:4860:4860::8888 2001:4860:4860::8844 {
-        AdvRDNSSLifetime 600;
-    };
-};
-EOF
-    # Enable and start radvd service
-    systemctl enable radvd
-    systemctl restart radvd
-else
-    echo "  radvd will be configured later (no IPv6 address on WAN)"
-fi
-
-echo ""
-echo "Step 7: Configuring DHCP/DNS server (dnsmasq)..."
 # Create dnsmasq configuration file (IPv4 only)
 echo "  Creating dnsmasq configuration file..."
 # Backup existing configuration
@@ -249,28 +156,8 @@ if [ -f /etc/dnsmasq.conf ] && [ ! -f /etc/dnsmasq.conf.backup ]; then
     cp /etc/dnsmasq.conf /etc/dnsmasq.conf.backup
 fi
 
-cat > /etc/dnsmasq.conf << EOF
-# Simple Router dnsmasq Configuration (IPv4 Only)
-
-# Basic settings
-interface=$LAN_INTERFACE
-bind-interfaces
-domain-needed
-bogus-priv
-
-# DNS settings (Cloudflare)
-server=1.1.1.1
-
-# IPv4 DHCP settings
-dhcp-range=$DHCP_IPV4_START,$DHCP_IPV4_END,255.255.255.0,24h
-dhcp-option=option:router,${LAN_IPV4_GATEWAY%/*}
-dhcp-option=option:dns-server,${LAN_IPV4_GATEWAY%/*}
-
-# Log settings
-log-dhcp
-# Cache size
-cache-size=500
-EOF
+# Substitute variables in the template file and create the final config
+envsubst < /etc/dnsmasq/dnsmasq.conf > /etc/dnsmasq.conf
 
 echo ""
 echo "Step 8: Starting services..."
