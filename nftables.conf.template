@@ -24,7 +24,7 @@ table inet filter {
     }
     chain forward {
         type filter hook forward priority 0; policy drop;
-        # Allow traffic from LAN (INTERFACE_3) to both WAN interfaces (INTERFACE_1 and INTERFACE_2)
+        # Allow traffic from LAN (INTERFACE_3) to both WAN interfaces
         iifname "INTERFACE_3" oifname "INTERFACE_1" accept
         iifname "INTERFACE_3" oifname "INTERFACE_2" accept
 
@@ -41,17 +41,19 @@ table inet nat {
     chain postrouting {
         type nat hook postrouting priority 100; policy accept;
         # NAPT: Masquerade traffic from LAN going out to WAN interfaces
-        # IP-based routing: 192.168.1.101 -> WAN1 (INTERFACE_1), 192.168.1.100 -> WAN2 (INTERFACE_2)
+        # IP-based routing: 192.168.1.101 -> WAN1, 192.168.1.100 -> WAN2
         ip saddr 192.168.1.101 oifname "INTERFACE_1" masquerade
         ip saddr 192.168.1.100 oifname "INTERFACE_2" masquerade
         # Default fallback for other IPs
         oifname "INTERFACE_1" masquerade
         oifname "INTERFACE_2" masquerade
     }
-    
-    # Add routing rules for IP-based WAN selection
+}
+
+# Packet marking for policy-based routing
+table inet mangle {
     chain prerouting {
-        type nat hook prerouting priority -100; policy accept;
+        type filter hook prerouting priority -150; policy accept;
         # Mark packets for different routing tables based on source IP
         iifname "INTERFACE_3" ip saddr 192.168.1.101 mark set 1
         iifname "INTERFACE_3" ip saddr 192.168.1.100 mark set 2
