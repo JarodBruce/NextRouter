@@ -11,9 +11,15 @@ scrape_configs:
     static_configs:
       - targets: ['localhost:9090']
 
-  - job_name: 'rust-app'
+  - job_name: 'networktraffic'
     static_configs:
       - targets: ['localhost:59121']
+    metrics_path: '/metrics'
+    scrape_interval: 1s
+
+  - job_name: 'packetloss'
+    static_configs:
+      - targets: ['localhost:59122']
     metrics_path: '/metrics'
     scrape_interval: 1s
   

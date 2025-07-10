@@ -12,7 +12,7 @@ use std::net::Ipv4Addr;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use log::{info, warn};
-use prometheus::{Counter, Gauge, Histogram, Registry, TextEncoder};
+use prometheus::{Gauge, Registry, TextEncoder};
 use hyper::service::{make_service_fn, service_fn};
 use hyper::{Body, Request, Response, Server, StatusCode};
 use std::convert::Infallible;
@@ -33,7 +33,7 @@ struct Args {
     verbose: bool,
     
     /// Prometheusメトリクス用のHTTPポート
-    #[arg(short, long, default_value = "9090")]
+    #[arg(short, long, default_value = "59122")]
     prometheus_port: u16,
 }
 
@@ -65,60 +65,45 @@ enum PacketLossType {
 #[derive(Debug, Clone)]
 struct PrometheusMetrics {
     registry: Registry,
-    // カウンターメトリクス
-    total_packets_counter: Counter,
-    tcp_packets_counter: Counter,
-    global_tcp_packets_counter: Counter,
-    packet_loss_missing_counter: Counter,
-    packet_loss_duplicate_counter: Counter,
-    packet_loss_out_of_order_counter: Counter,
-    window_shrink_counter: Counter,
+    // 1秒間の計測値をゲージで送信
+    global_tcp_packets_gauge: Gauge,
+    packet_loss_missing_gauge: Gauge,
+    packet_loss_duplicate_gauge: Gauge,
+    packet_loss_out_of_order_gauge: Gauge,
+    window_shrink_gauge: Gauge,
     
-    // ゲージメトリクス
+    // その他のゲージメトリクス
     active_connections_gauge: Gauge,
     current_window_size_gauge: Gauge,
-    
-    // ヒストグラム
-    packet_loss_gap_histogram: Histogram,
 }
 
 impl PrometheusMetrics {
     fn new() -> Result<Self, prometheus::Error> {
         let registry = Registry::new();
         
-        let total_packets_counter = Counter::new(
-            "tcp_monitor_total_packets",
-            "Total number of packets processed"
+        let global_tcp_packets_gauge = Gauge::new(
+            "tcp_monitor_global_tcp_packets_per_second",
+            "Number of global TCP packets processed per second"
         )?;
         
-        let tcp_packets_counter = Counter::new(
-            "tcp_monitor_tcp_packets",
-            "Total number of TCP packets processed"
+        let packet_loss_missing_gauge = Gauge::new(
+            "tcp_monitor_packet_loss_missing_per_second",
+            "Number of missing sequence packet loss events per second"
         )?;
         
-        let global_tcp_packets_counter = Counter::new(
-            "tcp_monitor_global_tcp_packets",
-            "Total number of global TCP packets processed"
+        let packet_loss_duplicate_gauge = Gauge::new(
+            "tcp_monitor_packet_loss_duplicate_per_second",
+            "Number of duplicate packet loss events per second"
         )?;
         
-        let packet_loss_missing_counter = Counter::new(
-            "tcp_monitor_packet_loss_missing",
-            "Number of missing sequence packet loss events"
+        let packet_loss_out_of_order_gauge = Gauge::new(
+            "tcp_monitor_packet_loss_out_of_order_per_second",
+            "Number of out-of-order packet loss events per second"
         )?;
         
-        let packet_loss_duplicate_counter = Counter::new(
-            "tcp_monitor_packet_loss_duplicate",
-            "Number of duplicate packet loss events"
-        )?;
-        
-        let packet_loss_out_of_order_counter = Counter::new(
-            "tcp_monitor_packet_loss_out_of_order",
-            "Number of out-of-order packet loss events"
-        )?;
-        
-        let window_shrink_counter = Counter::new(
-            "tcp_monitor_window_shrink",
-            "Number of TCP window shrink events"
+        let window_shrink_gauge = Gauge::new(
+            "tcp_monitor_window_shrink_per_second",
+            "Number of TCP window shrink events per second"
         )?;
         
         let active_connections_gauge = Gauge::new(
@@ -131,37 +116,24 @@ impl PrometheusMetrics {
             "Current TCP window size"
         )?;
         
-        let packet_loss_gap_histogram = Histogram::with_opts(
-            prometheus::HistogramOpts::new(
-                "tcp_monitor_packet_loss_gap",
-                "Distribution of packet loss gap sizes"
-            ).buckets(vec![1.0, 5.0, 10.0, 50.0, 100.0, 500.0, 1000.0, 5000.0])
-        )?;
-        
         // メトリクスを登録
-        registry.register(Box::new(total_packets_counter.clone()))?;
-        registry.register(Box::new(tcp_packets_counter.clone()))?;
-        registry.register(Box::new(global_tcp_packets_counter.clone()))?;
-        registry.register(Box::new(packet_loss_missing_counter.clone()))?;
-        registry.register(Box::new(packet_loss_duplicate_counter.clone()))?;
-        registry.register(Box::new(packet_loss_out_of_order_counter.clone()))?;
-        registry.register(Box::new(window_shrink_counter.clone()))?;
+        registry.register(Box::new(global_tcp_packets_gauge.clone()))?;
+        registry.register(Box::new(packet_loss_missing_gauge.clone()))?;
+        registry.register(Box::new(packet_loss_duplicate_gauge.clone()))?;
+        registry.register(Box::new(packet_loss_out_of_order_gauge.clone()))?;
+        registry.register(Box::new(window_shrink_gauge.clone()))?;
         registry.register(Box::new(active_connections_gauge.clone()))?;
         registry.register(Box::new(current_window_size_gauge.clone()))?;
-        registry.register(Box::new(packet_loss_gap_histogram.clone()))?;
         
         Ok(PrometheusMetrics {
             registry,
-            total_packets_counter,
-            tcp_packets_counter,
-            global_tcp_packets_counter,
-            packet_loss_missing_counter,
-            packet_loss_duplicate_counter,
-            packet_loss_out_of_order_counter,
-            window_shrink_counter,
+            global_tcp_packets_gauge,
+            packet_loss_missing_gauge,
+            packet_loss_duplicate_gauge,
+            packet_loss_out_of_order_gauge,
+            window_shrink_gauge,
             active_connections_gauge,
             current_window_size_gauge,
-            packet_loss_gap_histogram,
         })
     }
 }
@@ -190,6 +162,13 @@ struct GlobalStats {
     start_time: Instant,
     last_reset_time: Instant,
     prometheus_metrics: PrometheusMetrics,
+    
+    // 1秒間の計測値
+    global_tcp_packets_per_second: u64,
+    packet_loss_missing_per_second: u32,
+    packet_loss_duplicate_per_second: u32,
+    packet_loss_out_of_order_per_second: u32,
+    window_shrink_per_second: u32,
 }
 
 impl Default for GlobalStats {
@@ -207,6 +186,11 @@ impl Default for GlobalStats {
             start_time: now,
             last_reset_time: now,
             prometheus_metrics,
+            global_tcp_packets_per_second: 0,
+            packet_loss_missing_per_second: 0,
+            packet_loss_duplicate_per_second: 0,
+            packet_loss_out_of_order_per_second: 0,
+            window_shrink_per_second: 0,
         }
     }
 }
@@ -319,7 +303,7 @@ fn detect_packet_loss_and_window_shrink(
         let shrink_ratio = (state.last_window_size - window_size) as f64 / state.last_window_size as f64;
         if shrink_ratio > 0.3 { // 30%以上の縮小を検出
             stats.window_shrink_events += 1;
-            stats.prometheus_metrics.window_shrink_counter.inc();
+            stats.window_shrink_per_second += 1;
         }
     }
     state.last_window_size = window_size;
@@ -348,9 +332,8 @@ fn detect_packet_loss_and_window_shrink(
                 state.loss_events.push(loss_event.clone());
                 stats.packet_loss_events.push(loss_event);
                 
-                // Prometheusメトリクスを更新
-                stats.prometheus_metrics.packet_loss_missing_counter.inc();
-                stats.prometheus_metrics.packet_loss_gap_histogram.observe(gap_size as f64);
+                // 1秒間の計測値を更新
+                stats.packet_loss_missing_per_second += 1;
             }
             
             state.last_seq = seq_num;
@@ -371,8 +354,8 @@ fn detect_packet_loss_and_window_shrink(
                 state.loss_events.push(loss_event.clone());
                 stats.packet_loss_events.push(loss_event);
                 
-                // Prometheusメトリクスを更新
-                stats.prometheus_metrics.packet_loss_duplicate_counter.inc();
+                // 1秒間の計測値を更新
+                stats.packet_loss_duplicate_per_second += 1;
             } else {
                 state.out_of_order_count += 1;
                 
@@ -388,8 +371,8 @@ fn detect_packet_loss_and_window_shrink(
                 state.loss_events.push(loss_event.clone());
                 stats.packet_loss_events.push(loss_event);
                 
-                // Prometheusメトリクスを更新
-                stats.prometheus_metrics.packet_loss_out_of_order_counter.inc();
+                // 1秒間の計測値を更新
+                stats.packet_loss_out_of_order_per_second += 1;
             }
         }
     }
@@ -428,12 +411,11 @@ fn process_tcp_packet(
     
     let mut stats_guard = stats.lock().unwrap();
     stats_guard.tcp_packets += 1;
-    stats_guard.prometheus_metrics.tcp_packets_counter.inc();
     
     // インターフェース情報を考慮したグローバル接続判定を使用
     if is_global_connection_with_interface(&src_ip, &dst_ip, interface_name) {
         stats_guard.global_tcp_packets += 1;
-        stats_guard.prometheus_metrics.global_tcp_packets_counter.inc();
+        stats_guard.global_tcp_packets_per_second += 1;
     }
     
     // パケットロス検出とウィンドウサイズの縮小検出
@@ -443,7 +425,6 @@ fn process_tcp_packet(
 fn process_packet(packet_data: &[u8], stats: &Arc<Mutex<GlobalStats>>, interface_name: &str) {
     let mut stats_guard = stats.lock().unwrap();
     stats_guard.total_packets += 1;
-    stats_guard.prometheus_metrics.total_packets_counter.inc();
     drop(stats_guard);
     
     if let Some(ethernet) = EthernetPacket::new(packet_data) {
@@ -485,18 +466,30 @@ fn print_statistics(stats: &Arc<Mutex<GlobalStats>>) {
         }
     }
     
-    // 1秒間の統計を表示
+    // 1秒間の統計を表示（シンプルに）
     println!("\n=== 1秒間の統計 ===");
     println!("時刻: {}", Utc::now().format("%Y-%m-%d %H:%M:%S UTC"));
     println!("パケット欠損: {} 回", missing_count);
     println!("重複パケット: {} 回", duplicate_count);
     println!("順序乱れ: {} 回", out_of_order_count);
     println!("ウィンドウサイズ縮小: {} 回", stats_guard.window_shrink_events);
-    println!("総パケットロス: {} 回", missing_count + duplicate_count + out_of_order_count); 
+    println!("総パケットロス: {} 回", missing_count + duplicate_count + out_of_order_count);
+    
+    // Prometheusメトリクスを1秒間の計測値で更新
+    stats_guard.prometheus_metrics.global_tcp_packets_gauge.set(stats_guard.global_tcp_packets_per_second as f64);
+    stats_guard.prometheus_metrics.packet_loss_missing_gauge.set(stats_guard.packet_loss_missing_per_second as f64);
+    stats_guard.prometheus_metrics.packet_loss_duplicate_gauge.set(stats_guard.packet_loss_duplicate_per_second as f64);
+    stats_guard.prometheus_metrics.packet_loss_out_of_order_gauge.set(stats_guard.packet_loss_out_of_order_per_second as f64);
+    stats_guard.prometheus_metrics.window_shrink_gauge.set(stats_guard.window_shrink_per_second as f64);
     
     // 統計をリセット
     stats_guard.packet_loss_events.clear();
     stats_guard.window_shrink_events = 0;
+    stats_guard.global_tcp_packets_per_second = 0;
+    stats_guard.packet_loss_missing_per_second = 0;
+    stats_guard.packet_loss_duplicate_per_second = 0;
+    stats_guard.packet_loss_out_of_order_per_second = 0;
+    stats_guard.window_shrink_per_second = 0;
     stats_guard.last_reset_time = current_time;
 }
 
