@@ -1,0 +1,91 @@
+# Prometheus設定ファイル例
+# このファイルをprometheus.ymlとして保存し、Prometheusで使用してください
+
+global:
+  scrape_interval: 15s # データを取得する間隔
+  evaluation_interval: 15s # ルールを評価する間隔
+  
+  # 外部ラベルを追加（オプション）
+  external_labels:
+    monitor: 'tcp-window-monitor'
+    environment: 'production'
+
+# TCP Window Monitorからメトリクスを取得
+scrape_configs:
+  - job_name: 'tcp-window-monitor'
+    static_configs:
+      - targets: ['localhost:9090']
+    scrape_interval: 5s
+    scrape_timeout: 10s
+    metrics_path: /metrics
+    scheme: http
+    
+    # カスタムラベルを追加
+    labels:
+      service: 'tcp-monitor'
+      instance: 'main'
+
+# アラートルール（オプション）
+rule_files:
+  - "tcp_monitor_rules.yml"
+
+# Alertmanager設定（オプション）
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - 'localhost:9093'
+
+---
+# アラートルール例（tcp_monitor_rules.yml）
+groups:
+  - name: tcp_monitor_alerts
+    rules:
+      # パケットロス率が5%を超えた場合のアラート
+      - alert: HighPacketLossRate
+        expr: |
+          (
+            rate(tcp_monitor_packet_loss_missing[5m]) + 
+            rate(tcp_monitor_packet_loss_duplicate[5m]) + 
+            rate(tcp_monitor_packet_loss_out_of_order[5m])
+          ) / rate(tcp_monitor_tcp_packets[5m]) * 100 > 5
+        for: 1m
+        labels:
+          severity: warning
+          service: tcp-monitor
+        annotations:
+          summary: "高いパケットロス率が検出されました"
+          description: "パケットロス率が {{ $value }}% です（5分間平均）"
+      
+      # ウィンドウサイズ縮小イベントが頻発している場合のアラート
+      - alert: FrequentWindowShrinkEvents
+        expr: rate(tcp_monitor_window_shrink[5m]) > 10
+        for: 2m
+        labels:
+          severity: warning
+          service: tcp-monitor
+        annotations:
+          summary: "TCPウィンドウサイズ縮小イベントが頻発しています"
+          description: "ウィンドウサイズ縮小イベントが {{ $value }}/秒の頻度で発生しています"
+      
+      # アクティブ接続数が異常に多い場合のアラート
+      - alert: TooManyActiveConnections
+        expr: tcp_monitor_active_connections > 1000
+        for: 5m
+        labels:
+          severity: critical
+          service: tcp-monitor
+        annotations:
+          summary: "アクティブなTCP接続数が異常に多い"
+          description: "アクティブなTCP接続数が {{ $value }} です"
+      
+      # メトリクス収集が停止した場合のアラート
+      - alert: TcpMonitorDown
+        expr: up{job="tcp-window-monitor"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: tcp-monitor
+        annotations:
+          summary: "TCP Window Monitorが停止しました"
+          description: "TCP Window Monitorからメトリクスが取得できません"

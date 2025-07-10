@@ -14,3 +14,5 @@ chrono = { version = "0.4", features = ["serde"] }
 log = "0.4"
 env_logger = "0.10"
 statistics = "0.4"
+prometheus = "0.13"
+hyper = { version = "0.14", features = ["full"] }

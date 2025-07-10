@@ -3,16 +3,19 @@ use pcap::{Capture, Device};
 use pnet::packet::ethernet::{EtherTypes, EthernetPacket};
 use pnet::packet::ip::IpNextHeaderProtocols;
 use pnet::packet::ipv4::Ipv4Packet;
-use pnet::packet::ipv6::Ipv6Packet;
 use pnet::packet::tcp::TcpPacket;
 use pnet::packet::Packet;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
-use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
+use std::net::Ipv4Addr;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use log::{info, warn, debug};
+use log::{info, warn};
+use prometheus::{Counter, Gauge, Histogram, Registry, TextEncoder};
+use hyper::service::{make_service_fn, service_fn};
+use hyper::{Body, Request, Response, Server, StatusCode};
+use std::convert::Infallible;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -25,17 +28,13 @@ struct Args {
     #[arg(short, long, default_value = "1")]
     stats_interval: u64,
     
-    /// 出力ファイル（オプション）
-    #[arg(short, long)]
-    output: Option<String>,
-    
-    /// フィルタするポート（オプション）
-    #[arg(short, long)]
-    port: Option<u16>,
-    
     /// 詳細なログを出力
     #[arg(short, long)]
     verbose: bool,
+    
+    /// Prometheusメトリクス用のHTTPポート
+    #[arg(short, long, default_value = "9090")]
+    prometheus_port: u16,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -44,27 +43,6 @@ struct TcpConnection {
     dst_ip: String,
     src_port: u16,
     dst_port: u16,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-struct WindowSizeMeasurement {
-    timestamp: DateTime<Utc>,
-    connection: TcpConnection,
-    window_size: u16,
-    window_scale: u8,
-    effective_window_size: u32,
-    direction: String, // "outbound" or "inbound"
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-struct ConnectionStats {
-    connection: TcpConnection,
-    measurements: Vec<WindowSizeMeasurement>,
-    min_window_size: u32,
-    max_window_size: u32,
-    avg_window_size: f64,
-    window_size_variance: f64,
-    last_seen: DateTime<Utc>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -85,6 +63,110 @@ enum PacketLossType {
 }
 
 #[derive(Debug, Clone)]
+struct PrometheusMetrics {
+    registry: Registry,
+    // カウンターメトリクス
+    total_packets_counter: Counter,
+    tcp_packets_counter: Counter,
+    global_tcp_packets_counter: Counter,
+    packet_loss_missing_counter: Counter,
+    packet_loss_duplicate_counter: Counter,
+    packet_loss_out_of_order_counter: Counter,
+    window_shrink_counter: Counter,
+    
+    // ゲージメトリクス
+    active_connections_gauge: Gauge,
+    current_window_size_gauge: Gauge,
+    
+    // ヒストグラム
+    packet_loss_gap_histogram: Histogram,
+}
+
+impl PrometheusMetrics {
+    fn new() -> Result<Self, prometheus::Error> {
+        let registry = Registry::new();
+        
+        let total_packets_counter = Counter::new(
+            "tcp_monitor_total_packets",
+            "Total number of packets processed"
+        )?;
+        
+        let tcp_packets_counter = Counter::new(
+            "tcp_monitor_tcp_packets",
+            "Total number of TCP packets processed"
+        )?;
+        
+        let global_tcp_packets_counter = Counter::new(
+            "tcp_monitor_global_tcp_packets",
+            "Total number of global TCP packets processed"
+        )?;
+        
+        let packet_loss_missing_counter = Counter::new(
+            "tcp_monitor_packet_loss_missing",
+            "Number of missing sequence packet loss events"
+        )?;
+        
+        let packet_loss_duplicate_counter = Counter::new(
+            "tcp_monitor_packet_loss_duplicate",
+            "Number of duplicate packet loss events"
+        )?;
+        
+        let packet_loss_out_of_order_counter = Counter::new(
+            "tcp_monitor_packet_loss_out_of_order",
+            "Number of out-of-order packet loss events"
+        )?;
+        
+        let window_shrink_counter = Counter::new(
+            "tcp_monitor_window_shrink",
+            "Number of TCP window shrink events"
+        )?;
+        
+        let active_connections_gauge = Gauge::new(
+            "tcp_monitor_active_connections",
+            "Number of active TCP connections"
+        )?;
+        
+        let current_window_size_gauge = Gauge::new(
+            "tcp_monitor_current_window_size",
+            "Current TCP window size"
+        )?;
+        
+        let packet_loss_gap_histogram = Histogram::with_opts(
+            prometheus::HistogramOpts::new(
+                "tcp_monitor_packet_loss_gap",
+                "Distribution of packet loss gap sizes"
+            ).buckets(vec![1.0, 5.0, 10.0, 50.0, 100.0, 500.0, 1000.0, 5000.0])
+        )?;
+        
+        // メトリクスを登録
+        registry.register(Box::new(total_packets_counter.clone()))?;
+        registry.register(Box::new(tcp_packets_counter.clone()))?;
+        registry.register(Box::new(global_tcp_packets_counter.clone()))?;
+        registry.register(Box::new(packet_loss_missing_counter.clone()))?;
+        registry.register(Box::new(packet_loss_duplicate_counter.clone()))?;
+        registry.register(Box::new(packet_loss_out_of_order_counter.clone()))?;
+        registry.register(Box::new(window_shrink_counter.clone()))?;
+        registry.register(Box::new(active_connections_gauge.clone()))?;
+        registry.register(Box::new(current_window_size_gauge.clone()))?;
+        registry.register(Box::new(packet_loss_gap_histogram.clone()))?;
+        
+        Ok(PrometheusMetrics {
+            registry,
+            total_packets_counter,
+            tcp_packets_counter,
+            global_tcp_packets_counter,
+            packet_loss_missing_counter,
+            packet_loss_duplicate_counter,
+            packet_loss_out_of_order_counter,
+            window_shrink_counter,
+            active_connections_gauge,
+            current_window_size_gauge,
+            packet_loss_gap_histogram,
+        })
+    }
+}
+
+#[derive(Debug, Clone)]
 struct ConnectionState {
     last_seq: u32,
     last_ack: u32,
@@ -94,6 +176,7 @@ struct ConnectionState {
     out_of_order_count: u32,
     duplicate_count: u32,
     last_seen: DateTime<Utc>,
+    last_window_size: u16,
 }
 
 #[derive(Debug)]
@@ -101,24 +184,29 @@ struct GlobalStats {
     total_packets: u64,
     tcp_packets: u64,
     global_tcp_packets: u64,
-    connections: HashMap<String, ConnectionStats>,
     connection_states: HashMap<String, ConnectionState>,
     packet_loss_events: Vec<PacketLossEvent>,
-    analyses: HashMap<String, ConnectionAnalysis>,
+    window_shrink_events: u32,
     start_time: Instant,
+    last_reset_time: Instant,
+    prometheus_metrics: PrometheusMetrics,
 }
 
 impl Default for GlobalStats {
     fn default() -> Self {
+        let now = Instant::now();
+        let prometheus_metrics = PrometheusMetrics::new().expect("Failed to create Prometheus metrics");
+        
         Self {
             total_packets: 0,
             tcp_packets: 0,
             global_tcp_packets: 0,
-            connections: HashMap::new(),
             connection_states: HashMap::new(),
             packet_loss_events: Vec::new(),
-            analyses: HashMap::new(),
-            start_time: Instant::now(),
+            window_shrink_events: 0,
+            start_time: now,
+            last_reset_time: now,
+            prometheus_metrics,
         }
     }
 }
@@ -135,11 +223,8 @@ impl TcpConnection {
 
 /// IPアドレスがプライベート（ローカル）アドレスかどうかを判定
 fn is_private_ip(ip_str: &str) -> bool {
-    if let Ok(ip) = ip_str.parse::<IpAddr>() {
-        match ip {
-            IpAddr::V4(ipv4) => is_private_ipv4(ipv4),
-            IpAddr::V6(ipv6) => is_private_ipv6(ipv6),
-        }
+    if let Ok(ip) = ip_str.parse::<Ipv4Addr>() {
+        is_private_ipv4(ip)
     } else {
         // パースできない場合は安全のためプライベートと判定
         true
@@ -182,91 +267,12 @@ fn is_local_ip_with_interface(ip_str: &str, interface_name: &str) -> bool {
 
 /// IPv4アドレスがプライベートアドレスかどうかを判定
 fn is_private_ipv4(ip: Ipv4Addr) -> bool {
-    // RFC 1918 プライベートアドレス範囲
-    // 10.0.0.0/8        (10.0.0.0 - 10.255.255.255)
-    // 172.16.0.0/12     (172.16.0.0 - 172.31.255.255)
-    // 192.168.0.0/16    (192.168.0.0 - 192.168.255.255)
-    // 
-    // その他のローカルアドレス
-    // 127.0.0.0/8       (ループバック)
-    // 169.254.0.0/16    (リンクローカル)
-    
-    let octets = ip.octets();
-    
-    // 10.0.0.0/8
-    if octets[0] == 10 {
-        return true;
-    }
-    
-    // 172.16.0.0/12
-    if octets[0] == 172 && (octets[1] >= 16 && octets[1] <= 31) {
-        return true;
-    }
-    
-    // 192.168.0.0/16
-    if octets[0] == 192 && octets[1] == 168 {
-        return true;
-    }
-    
-    // 127.0.0.0/8 (ループバック)
-    if octets[0] == 127 {
-        return true;
-    }
-    
-    // 169.254.0.0/16 (リンクローカル)
-    if octets[0] == 169 && octets[1] == 254 {
-        return true;
-    }
-    
-    // 0.0.0.0/8 (このネットワーク)
-    if octets[0] == 0 {
-        return true;
-    }
-    
-    // 224.0.0.0/4 (マルチキャスト)
-    if octets[0] >= 224 && octets[0] <= 239 {
-        return true;
-    }
-    
-    // 240.0.0.0/4 (実験用)
-    if octets[0] >= 240 {
-        return true;
-    }
-    
-    false
-}
-
-/// IPv6アドレスがプライベートアドレスかどうかを判定
-fn is_private_ipv6(ip: Ipv6Addr) -> bool {
-    // IPv6のプライベート/ローカルアドレス範囲
-    // ::1/128           (ループバック)
-    // ::/128            (未指定アドレス)
-    // fc00::/7          (Unique Local Address)
-    // fe80::/10         (リンクローカル)
-    // ff00::/8          (マルチキャスト)
-    
-    if ip.is_loopback() || ip.is_unspecified() {
-        return true;
-    }
-    
-    let segments = ip.segments();
-    
-    // fc00::/7 (Unique Local Address)
-    if (segments[0] & 0xfe00) == 0xfc00 {
-        return true;
-    }
-    
-    // fe80::/10 (リンクローカル)
-    if (segments[0] & 0xffc0) == 0xfe80 {
-        return true;
-    }
-    
-    // ff00::/8 (マルチキャスト)
-    if (segments[0] & 0xff00) == 0xff00 {
-        return true;
-    }
-    
-    false
+    ip.is_private()
+        || ip.is_loopback()
+        || ip.is_link_local()
+        || ip.is_multicast()
+        || ip.is_unspecified()
+        || ip.is_documentation()
 }
 
 /// 両方のIPアドレスがグローバルIPかどうかを判定（インターフェース情報を考慮）
@@ -279,12 +285,13 @@ fn is_global_connection(src_ip: &str, dst_ip: &str) -> bool {
     !is_private_ip(src_ip) && !is_private_ip(dst_ip)
 }
 
-/// パケットロスを検出する
-fn detect_packet_loss(
+/// パケットロスとウィンドウサイズの縮小を検出する
+fn detect_packet_loss_and_window_shrink(
     connection: &TcpConnection,
     seq_num: u32,
     ack_num: u32,
     payload_len: u32,
+    window_size: u16,
     stats: &mut GlobalStats,
 ) {
     let connection_key = connection.key();
@@ -294,31 +301,41 @@ fn detect_packet_loss(
         ConnectionState {
             last_seq: seq_num,
             last_ack: ack_num,
-            expected_seq: seq_num.wrapping_add(payload_len.max(1)), // SYNの場合は1、データがある場合はペイロード長
+            expected_seq: seq_num.wrapping_add(payload_len.max(1)),
             packet_count: 0,
             loss_events: Vec::new(),
             out_of_order_count: 0,
             duplicate_count: 0,
             last_seen: Utc::now(),
+            last_window_size: window_size,
         }
     });
     
     state.packet_count += 1;
     state.last_seen = Utc::now();
     
+    // ウィンドウサイズの縮小検出
+    if state.last_window_size > 0 && window_size < state.last_window_size {
+        let shrink_ratio = (state.last_window_size - window_size) as f64 / state.last_window_size as f64;
+        if shrink_ratio > 0.3 { // 30%以上の縮小を検出
+            stats.window_shrink_events += 1;
+            stats.prometheus_metrics.window_shrink_counter.inc();
+        }
+    }
+    state.last_window_size = window_size;
+    
+    // 現在のウィンドウサイズを更新
+    stats.prometheus_metrics.current_window_size_gauge.set(window_size as f64);
+    
     // ペイロードがある場合のみシーケンス番号分析を行う
     if payload_len > 0 {
-        // パケットロス検出ロジック
         if seq_num == state.expected_seq {
-            // 期待通りのシーケンス番号
             state.last_seq = seq_num;
             state.expected_seq = seq_num.wrapping_add(payload_len);
         } else if seq_num > state.expected_seq {
-            // シーケンス番号にギャップがある = パケットロスの可能性
             let gap_size = seq_num.wrapping_sub(state.expected_seq);
             
-            // 小さなギャップは無視（TCP の実装による誤差の可能性）
-            if gap_size > 0 && gap_size < 1000000 { // 1MB以下のギャップのみ検出
+            if gap_size > 0 && gap_size < 1000000 {
                 let loss_event = PacketLossEvent {
                     timestamp: Utc::now(),
                     connection: connection.clone(),
@@ -330,14 +347,16 @@ fn detect_packet_loss(
                 
                 state.loss_events.push(loss_event.clone());
                 stats.packet_loss_events.push(loss_event);
+                
+                // Prometheusメトリクスを更新
+                stats.prometheus_metrics.packet_loss_missing_counter.inc();
+                stats.prometheus_metrics.packet_loss_gap_histogram.observe(gap_size as f64);
             }
             
             state.last_seq = seq_num;
             state.expected_seq = seq_num.wrapping_add(payload_len);
         } else if seq_num < state.expected_seq {
-            // 過去のシーケンス番号 = 重複パケットまたは順序乱れ
             if seq_num == state.last_seq {
-                // 完全に同じシーケンス番号 = 重複パケット（再送）
                 state.duplicate_count += 1;
                 
                 let loss_event = PacketLossEvent {
@@ -351,8 +370,10 @@ fn detect_packet_loss(
                 
                 state.loss_events.push(loss_event.clone());
                 stats.packet_loss_events.push(loss_event);
+                
+                // Prometheusメトリクスを更新
+                stats.prometheus_metrics.packet_loss_duplicate_counter.inc();
             } else {
-                // 順序乱れ
                 state.out_of_order_count += 1;
                 
                 let loss_event = PacketLossEvent {
@@ -366,26 +387,20 @@ fn detect_packet_loss(
                 
                 state.loss_events.push(loss_event.clone());
                 stats.packet_loss_events.push(loss_event);
-
+                
+                // Prometheusメトリクスを更新
+                stats.prometheus_metrics.packet_loss_out_of_order_counter.inc();
             }
         }
     }
     
-    // ACK番号の更新
     if ack_num > state.last_ack {
         state.last_ack = ack_num;
     }
-}
-
-fn get_window_scale_from_options(_tcp_packet: &TcpPacket) -> u8 {
-    // TCP オプションから Window Scale を取得
-    // 簡単な実装のため、デフォルトで0を返す
-    // 実際の実装では TCP オプションを解析する必要がある
-    0
-}
-
-fn calculate_effective_window_size(window_size: u16, window_scale: u8) -> u32 {
-    (window_size as u32) << window_scale
+    
+    // 最後にアクティブ接続数を更新
+    let active_connections_count = stats.connection_states.len();
+    stats.prometheus_metrics.active_connections_gauge.set(active_connections_count as f64);
 }
 
 fn process_tcp_packet(
@@ -393,22 +408,11 @@ fn process_tcp_packet(
     src_ip: String,
     dst_ip: String,
     stats: &Arc<Mutex<GlobalStats>>,
-    port_filter: Option<u16>,
     interface_name: &str,
 ) {
     let src_port = tcp_packet.get_source();
     let dst_port = tcp_packet.get_destination();
-    
-    // ポートフィルタリング
-    if let Some(filter_port) = port_filter {
-        if src_port != filter_port && dst_port != filter_port {
-            return;
-        }
-    }
-    
     let window_size = tcp_packet.get_window();
-    let window_scale = get_window_scale_from_options(tcp_packet);
-    let effective_window_size = calculate_effective_window_size(window_size, window_scale);
     
     // TCP シーケンス番号とACK番号を取得
     let seq_num = tcp_packet.get_sequence();
@@ -422,468 +426,129 @@ fn process_tcp_packet(
         dst_port,
     };
     
-    let measurement = WindowSizeMeasurement {
-        timestamp: Utc::now(),
-        connection: connection.clone(),
-        window_size,
-        window_scale,
-        effective_window_size,
-        direction: "outbound".to_string(), // 簡単な実装
-    };
-    
     let mut stats_guard = stats.lock().unwrap();
     stats_guard.tcp_packets += 1;
+    stats_guard.prometheus_metrics.tcp_packets_counter.inc();
     
     // インターフェース情報を考慮したグローバル接続判定を使用
     if is_global_connection_with_interface(&src_ip, &dst_ip, interface_name) {
         stats_guard.global_tcp_packets += 1;
+        stats_guard.prometheus_metrics.global_tcp_packets_counter.inc();
     }
     
-    let connection_key = connection.key();
-    let reverse_key = connection.reverse_key();
-    
-    // パケットロス検出
-    detect_packet_loss(&connection, seq_num, ack_num, payload_len, &mut stats_guard);
-    
-    // 既存の接続を探す（双方向を考慮）
-    let key_to_use = if stats_guard.connections.contains_key(&connection_key) {
-        connection_key
-    } else if stats_guard.connections.contains_key(&reverse_key) {
-        reverse_key
-    } else {
-        connection_key
-    };
-    
-    let conn_stats = stats_guard.connections.entry(key_to_use).or_insert_with(|| {
-        ConnectionStats {
-            connection: connection.clone(),
-            measurements: Vec::new(),
-            min_window_size: effective_window_size,
-            max_window_size: effective_window_size,
-            avg_window_size: effective_window_size as f64,
-            window_size_variance: 0.0,
-            last_seen: Utc::now(),
-        }
-    });
-    
-    // 統計を更新
-    conn_stats.measurements.push(measurement);
-    conn_stats.min_window_size = conn_stats.min_window_size.min(effective_window_size);
-    conn_stats.max_window_size = conn_stats.max_window_size.max(effective_window_size);
-    conn_stats.last_seen = Utc::now();
-    
-    // 平均と分散を計算
-    let window_sizes: Vec<f64> = conn_stats.measurements
-        .iter()
-        .map(|m| m.effective_window_size as f64)
-        .collect();
-    
-    if !window_sizes.is_empty() {
-        conn_stats.avg_window_size = window_sizes.iter().sum::<f64>() / window_sizes.len() as f64;
-        
-        if window_sizes.len() > 1 {
-            let variance = window_sizes
-                .iter()
-                .map(|x| (x - conn_stats.avg_window_size).powi(2))
-                .sum::<f64>() / (window_sizes.len() - 1) as f64;
-            conn_stats.window_size_variance = variance;
-        }
-    }
+    // パケットロス検出とウィンドウサイズの縮小検出
+    detect_packet_loss_and_window_shrink(&connection, seq_num, ack_num, payload_len, window_size, &mut stats_guard);
 }
 
-fn process_packet(packet_data: &[u8], stats: &Arc<Mutex<GlobalStats>>, port_filter: Option<u16>, interface_name: &str) {
+fn process_packet(packet_data: &[u8], stats: &Arc<Mutex<GlobalStats>>, interface_name: &str) {
     let mut stats_guard = stats.lock().unwrap();
     stats_guard.total_packets += 1;
+    stats_guard.prometheus_metrics.total_packets_counter.inc();
     drop(stats_guard);
     
     if let Some(ethernet) = EthernetPacket::new(packet_data) {
-        match ethernet.get_ethertype() {
-            EtherTypes::Ipv4 => {
-                if let Some(ipv4) = Ipv4Packet::new(ethernet.payload()) {
-                    if ipv4.get_next_level_protocol() == IpNextHeaderProtocols::Tcp {
-                        if let Some(tcp) = TcpPacket::new(ipv4.payload()) {
-                            let src_ip = ipv4.get_source().to_string();
-                            let dst_ip = ipv4.get_destination().to_string();
-                            process_tcp_packet(&tcp, src_ip, dst_ip, stats, port_filter, interface_name);
-                        }
+        if ethernet.get_ethertype() == EtherTypes::Ipv4 {
+            if let Some(ipv4) = Ipv4Packet::new(ethernet.payload()) {
+                if ipv4.get_next_level_protocol() == IpNextHeaderProtocols::Tcp {
+                    if let Some(tcp) = TcpPacket::new(ipv4.payload()) {
+                        let src_ip = ipv4.get_source().to_string();
+                        let dst_ip = ipv4.get_destination().to_string();
+                        process_tcp_packet(&tcp, src_ip, dst_ip, stats, interface_name);
                     }
                 }
             }
-            EtherTypes::Ipv6 => {
-                if let Some(ipv6) = Ipv6Packet::new(ethernet.payload()) {
-                    if ipv6.get_next_header() == IpNextHeaderProtocols::Tcp {
-                        if let Some(tcp) = TcpPacket::new(ipv6.payload()) {
-                            let src_ip = ipv6.get_source().to_string();
-                            let dst_ip = ipv6.get_destination().to_string();
-                            process_tcp_packet(&tcp, src_ip, dst_ip, stats, port_filter, interface_name);
-                        }
-                    }
-                }
-            }
-            _ => {}
         }
-    }
-}
-
-fn perform_detailed_analysis(stats: &Arc<Mutex<GlobalStats>>) {
-    let mut stats_guard = stats.lock().unwrap();
-    
-    // Clone the connections data to avoid borrowing conflicts
-    let connections_data: Vec<(String, Vec<u32>)> = stats_guard.connections
-        .iter()
-        .filter(|(_, conn_stats)| conn_stats.measurements.len() >= 10)
-        .map(|(key, conn_stats)| {
-            let window_sizes: Vec<u32> = conn_stats.measurements
-                .iter()
-                .map(|m| m.effective_window_size)
-                .collect();
-            (key.clone(), window_sizes)
-        })
-        .collect();
-    
-    // Now perform analysis on the cloned data
-    for (key, window_sizes) in connections_data {
-        // Simple RTT estimation (placeholder - in real implementation, this would be measured)
-        let estimated_rtt = vec![50.0; window_sizes.len()]; // 50ms default RTT
-        
-        let mut analysis = ConnectionAnalysis::new(key.clone());
-        analysis.complete_analysis(&window_sizes, &estimated_rtt);
-        
-        stats_guard.analyses.insert(key, analysis);
     }
 }
 
 fn print_statistics(stats: &Arc<Mutex<GlobalStats>>) {
-    let stats_guard = stats.lock().unwrap();
-    let elapsed = stats_guard.start_time.elapsed();
+    let mut stats_guard = stats.lock().unwrap();
+    let current_time = Instant::now();
     
-    // パケットロス統計を表示
-    if !stats_guard.packet_loss_events.is_empty() {
-        let mut missing_count = 0;
-        let mut duplicate_count = 0;
-        let mut out_of_order_count = 0;
+    // 1秒間のパケットロス統計をカウント
+    let mut missing_count = 0;
+    let mut duplicate_count = 0;
+    let mut out_of_order_count = 0;
+    
+    // 最後のリセット時刻以降のイベントのみカウント
+    let reset_time = stats_guard.last_reset_time;
+    for event in &stats_guard.packet_loss_events {
+        let event_elapsed = current_time.duration_since(stats_guard.start_time);
+        let event_time = stats_guard.start_time + Duration::from_secs(event_elapsed.as_secs());
         
-        for event in &stats_guard.packet_loss_events {
+        if event_time >= reset_time {
             match event.loss_type {
                 PacketLossType::MissingSequence => missing_count += 1,
                 PacketLossType::DuplicateSequence => duplicate_count += 1,
                 PacketLossType::OutOfOrder => out_of_order_count += 1,
             }
         }
-        
-        println!("\n--- パケットロス詳細 ---");
-        println!("  パケット欠損: {} 回", missing_count);
-        println!("  重複パケット: {} 回", duplicate_count);
-        println!("  順序乱れ: {} 回", out_of_order_count);
-        
-        if stats_guard.global_tcp_packets > 0 {
-            let loss_rate = (missing_count as f64 / stats_guard.global_tcp_packets as f64) * 100.0;
-            println!("  推定パケットロス率: {:.4}%", loss_rate);
-        }
     }
     
-    // 接続別統計を表示
-    for (key, conn_stats) in &stats_guard.connections {
-        if conn_stats.measurements.len() > 5 { // 十分なサンプルがある接続のみ表示
-            println!("\n--- 接続: {} ---", key);
-            println!("  測定回数: {}", conn_stats.measurements.len());
-            println!("  最小ウィンドウサイズ: {} bytes", conn_stats.min_window_size);
-            println!("  最大ウィンドウサイズ: {} bytes", conn_stats.max_window_size);
-            println!("  平均ウィンドウサイズ: {:.0} bytes", conn_stats.avg_window_size);
-            println!("  標準偏差: {:.0} bytes", conn_stats.window_size_variance.sqrt());
-            
-            // この接続のパケットロス情報を表示
-            if let Some(conn_state) = stats_guard.connection_states.get(key) {
-                println!("  パケット総数: {}", conn_state.packet_count);
-                println!("  パケットロスイベント: {} 回", conn_state.loss_events.len());
-                println!("  重複パケット: {} 回", conn_state.duplicate_count);
-                println!("  順序乱れ: {} 回", conn_state.out_of_order_count);
-                
-                if conn_state.packet_count > 0 && !conn_state.loss_events.is_empty() {
-                    let connection_loss_rate = (conn_state.loss_events.len() as f64 / conn_state.packet_count as f64) * 100.0;
-                    println!("  接続パケットロス率: {:.4}%", connection_loss_rate);
-                }
-            }
-            
-            // 推定帯域幅（簡単な計算）
-            let max_window_kb = conn_stats.max_window_size as f64 / 1024.0;
-            println!("  推定最大帯域幅 (Window based): {:.2} KB/s", max_window_kb);
-            
-            println!("  最後の観測: {}", conn_stats.last_seen.format("%Y-%m-%d %H:%M:%S UTC"));
+    // 1秒間の統計を表示
+    println!("\n=== 1秒間の統計 ===");
+    println!("時刻: {}", Utc::now().format("%Y-%m-%d %H:%M:%S UTC"));
+    println!("パケット欠損: {} 回", missing_count);
+    println!("重複パケット: {} 回", duplicate_count);
+    println!("順序乱れ: {} 回", out_of_order_count);
+    println!("ウィンドウサイズ縮小: {} 回", stats_guard.window_shrink_events);
+    println!("総パケットロス: {} 回", missing_count + duplicate_count + out_of_order_count); 
+    
+    // 統計をリセット
+    stats_guard.packet_loss_events.clear();
+    stats_guard.window_shrink_events = 0;
+    stats_guard.last_reset_time = current_time;
+}
+
+// Prometheusメトリクスを提供するHTTPサーバー
+async fn metrics_handler(
+    _req: Request<Body>,
+    stats: Arc<Mutex<GlobalStats>>,
+) -> Result<Response<Body>, Infallible> {
+    let stats_guard = stats.lock().unwrap();
+    let encoder = TextEncoder::new();
+    let metric_families = stats_guard.prometheus_metrics.registry.gather();
+    
+    match encoder.encode_to_string(&metric_families) {
+        Ok(metrics_string) => {
+            let response = Response::builder()
+                .header("Content-Type", "text/plain; version=0.0.4")
+                .body(Body::from(metrics_string))
+                .unwrap();
+            Ok(response)
+        }
+        Err(_) => {
+            let response = Response::builder()
+                .status(StatusCode::INTERNAL_SERVER_ERROR)
+                .body(Body::from("Error encoding metrics"))
+                .unwrap();
+            Ok(response)
         }
     }
 }
 
-// === Analysis module content (previously in analysis.rs) ===
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct BandwidthEstimate {
-    pub timestamp: DateTime<Utc>,
-    pub window_size: u32,
-    pub estimated_rtt_ms: f64,
-    pub estimated_bandwidth_bps: f64,
-    pub confidence: f64, // 0.0 - 1.0
+async fn start_prometheus_server(port: u16, stats: Arc<Mutex<GlobalStats>>) -> Result<(), Box<dyn std::error::Error>> {
+    let addr = ([0, 0, 0, 0], port).into();
+    
+    let make_svc = make_service_fn(move |_conn| {
+        let stats = Arc::clone(&stats);
+        async move {
+            Ok::<_, Infallible>(service_fn(move |req| {
+                metrics_handler(req, Arc::clone(&stats))
+            }))
+        }
+    });
+    
+    let server = Server::bind(&addr).serve(make_svc);
+    
+    info!("Prometheusメトリクスサーバーを開始しました: http://0.0.0.0:{}/metrics", port);
+    
+    if let Err(e) = server.await {
+        warn!("Prometheusサーバーエラー: {}", e);
+    }
+    
+    Ok(())
 }
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ConnectionAnalysis {
-    pub connection_key: String,
-    pub total_measurements: usize,
-    pub analysis_period_seconds: f64,
-    
-    // Window size statistics
-    pub window_stats: WindowStatistics,
-    
-    // Bandwidth estimates
-    pub bandwidth_estimates: Vec<BandwidthEstimate>,
-    pub peak_bandwidth_bps: f64,
-    pub average_bandwidth_bps: f64,
-    
-    // Flow control analysis
-    pub zero_window_events: usize,
-    pub window_scaling_factor: u8,
-    pub congestion_control_events: usize,
-    
-    // Performance indicators
-    pub bottleneck_type: BottleneckType,
-    pub performance_score: f64, // 0.0 - 100.0
-    pub recommendations: Vec<String>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct WindowStatistics {
-    pub min: u32,
-    pub max: u32,
-    pub mean: f64,
-    pub median: f64,
-    pub std_dev: f64,
-    pub percentile_95: f64,
-    pub percentile_99: f64,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum BottleneckType {
-    NetworkBandwidth,
-    ReceiverBuffer,
-    ApplicationProcessing,
-    CongestionControl,
-    Unknown,
-}
-
-impl ConnectionAnalysis {
-    pub fn new(connection_key: String) -> Self {
-        Self {
-            connection_key,
-            total_measurements: 0,
-            analysis_period_seconds: 0.0,
-            window_stats: WindowStatistics::default(),
-            bandwidth_estimates: Vec::new(),
-            peak_bandwidth_bps: 0.0,
-            average_bandwidth_bps: 0.0,
-            zero_window_events: 0,
-            window_scaling_factor: 0,
-            congestion_control_events: 0,
-            bottleneck_type: BottleneckType::Unknown,
-            performance_score: 0.0,
-            recommendations: Vec::new(),
-        }
-    }
-    
-    pub fn analyze_window_sizes(&mut self, window_sizes: &[u32]) {
-        if window_sizes.is_empty() {
-            return;
-        }
-        
-        self.total_measurements = window_sizes.len();
-        
-        // Basic statistics
-        let min = *window_sizes.iter().min().unwrap();
-        let max = *window_sizes.iter().max().unwrap();
-        let sum: u32 = window_sizes.iter().sum();
-        let mean = sum as f64 / window_sizes.len() as f64;
-        
-        // Calculate median and percentiles
-        let mut sorted_sizes = window_sizes.to_vec();
-        sorted_sizes.sort_unstable();
-        
-        let median = if sorted_sizes.len() % 2 == 0 {
-            let mid = sorted_sizes.len() / 2;
-            (sorted_sizes[mid - 1] + sorted_sizes[mid]) as f64 / 2.0
-        } else {
-            sorted_sizes[sorted_sizes.len() / 2] as f64
-        };
-        
-        let percentile_95 = sorted_sizes[(sorted_sizes.len() as f64 * 0.95) as usize] as f64;
-        let percentile_99 = sorted_sizes[(sorted_sizes.len() as f64 * 0.99) as usize] as f64;
-        
-        // Calculate standard deviation
-        let variance = window_sizes
-            .iter()
-            .map(|&x| (x as f64 - mean).powi(2))
-            .sum::<f64>() / (window_sizes.len() - 1) as f64;
-        let std_dev = variance.sqrt();
-        
-        self.window_stats = WindowStatistics {
-            min,
-            max,
-            mean,
-            median,
-            std_dev,
-            percentile_95,
-            percentile_99,
-        };
-        
-        // Count zero window events
-        self.zero_window_events = window_sizes.iter().filter(|&&x| x == 0).count();
-        
-        // Detect congestion control events (significant window size decreases)
-        self.detect_congestion_events(window_sizes);
-    }
-    
-    fn detect_congestion_events(&mut self, window_sizes: &[u32]) {
-        let mut congestion_events = 0;
-        let threshold = 0.5; // 50% decrease threshold
-        
-        for window in window_sizes.windows(2) {
-            if window[0] > 0 && (window[1] as f64) < (window[0] as f64 * threshold) {
-                congestion_events += 1;
-            }
-        }
-        
-        self.congestion_control_events = congestion_events;
-    }
-    
-    pub fn estimate_bandwidth(&mut self, rtt_estimates: &[f64]) {
-        if self.window_stats.max == 0 || rtt_estimates.is_empty() {
-            return;
-        }
-        
-        let mut bandwidth_estimates = Vec::new();
-        let avg_rtt = rtt_estimates.iter().sum::<f64>() / rtt_estimates.len() as f64;
-        
-        // Simple bandwidth estimation: Window Size / RTT
-        let max_bandwidth = (self.window_stats.max as f64 * 8.0) / (avg_rtt / 1000.0); // bps
-        let avg_bandwidth = (self.window_stats.mean * 8.0) / (avg_rtt / 1000.0); // bps
-        
-        self.peak_bandwidth_bps = max_bandwidth;
-        self.average_bandwidth_bps = avg_bandwidth;
-        
-        // Create bandwidth estimate
-        let estimate = BandwidthEstimate {
-            timestamp: Utc::now(),
-            window_size: self.window_stats.max,
-            estimated_rtt_ms: avg_rtt,
-            estimated_bandwidth_bps: max_bandwidth,
-            confidence: self.calculate_confidence(),
-        };
-        
-        bandwidth_estimates.push(estimate);
-        self.bandwidth_estimates = bandwidth_estimates;
-    }
-    
-    fn calculate_confidence(&self) -> f64 {
-        // Confidence based on number of measurements and variance
-        let measurement_confidence = (self.total_measurements as f64 / 100.0).min(1.0);
-        let variance_confidence = 1.0 - (self.window_stats.std_dev / self.window_stats.mean).min(1.0);
-        
-        (measurement_confidence + variance_confidence) / 2.0
-    }
-    
-    pub fn determine_bottleneck(&mut self) {
-        // Analyze patterns to determine bottleneck type
-        let cv = self.window_stats.std_dev / self.window_stats.mean; // Coefficient of variation
-        
-        self.bottleneck_type = if self.zero_window_events > self.total_measurements / 10 {
-            BottleneckType::ApplicationProcessing
-        } else if cv > 0.5 && self.congestion_control_events > self.total_measurements / 20 {
-            BottleneckType::CongestionControl
-        } else if self.window_stats.max < 8192 {
-            BottleneckType::ReceiverBuffer
-        } else if cv < 0.2 && self.window_stats.mean > 32768.0 {
-            BottleneckType::NetworkBandwidth
-        } else {
-            BottleneckType::Unknown
-        };
-    }
-    
-    pub fn calculate_performance_score(&mut self) {
-        let mut score = 100.0;
-        
-        // Reduce score for zero window events
-        if self.zero_window_events > 0 {
-            score -= (self.zero_window_events as f64 / self.total_measurements as f64) * 30.0;
-        }
-        
-        // Reduce score for high congestion events
-        if self.congestion_control_events > 0 {
-            score -= (self.congestion_control_events as f64 / self.total_measurements as f64) * 20.0;
-        }
-        
-        // Reduce score for small window sizes
-        if self.window_stats.mean < 16384.0 {
-            score -= 25.0;
-        }
-        
-        // Reduce score for high variance
-        let cv = self.window_stats.std_dev / self.window_stats.mean;
-        if cv > 0.5 {
-            score -= cv * 20.0;
-        }
-        
-        self.performance_score = score.max(0.0).min(100.0);
-    }
-    
-    pub fn generate_recommendations(&mut self) {
-        let mut recommendations = Vec::new();
-        
-        match self.bottleneck_type {
-            BottleneckType::ApplicationProcessing => {
-                recommendations.push("アプリケーションの処理速度を向上させることを検討してください".to_string());
-                recommendations.push("受信バッファのサイズを増やすことを検討してください".to_string());
-            }
-            BottleneckType::ReceiverBuffer => {
-                recommendations.push("TCP受信バッファサイズ (net.core.rmem_max) を増やしてください".to_string());
-                recommendations.push("アプリケーションの読み込み頻度を増やしてください".to_string());
-            }
-            BottleneckType::NetworkBandwidth => {
-                recommendations.push("ネットワーク帯域幅がボトルネックになっている可能性があります".to_string());
-                recommendations.push("ネットワーク経路の最適化を検討してください".to_string());
-            }
-            BottleneckType::CongestionControl => {
-                recommendations.push("ネットワーク輻輳が発生しています".to_string());
-                recommendations.push("TCP輻輳制御アルゴリズムの調整を検討してください".to_string());
-            }
-            BottleneckType::Unknown => {
-                recommendations.push("より長期間の監視でパターンを分析してください".to_string());
-            }
-        }
-        self.recommendations = recommendations;
-    }
-    
-    pub fn complete_analysis(&mut self, window_sizes: &[u32], rtt_estimates: &[f64]) {
-        self.analyze_window_sizes(window_sizes);
-        self.estimate_bandwidth(rtt_estimates);
-        self.determine_bottleneck();
-        self.calculate_performance_score();
-        self.generate_recommendations();
-    }
-}
-
-impl Default for WindowStatistics {
-    fn default() -> Self {
-        Self {
-            min: 0,
-            max: 0,
-            mean: 0.0,
-            median: 0.0,
-            std_dev: 0.0,
-            percentile_95: 0.0,
-            percentile_99: 0.0,
-        }
-    }
-}
-
-// === End of Analysis module content ===
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -939,11 +604,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .open()?;
     
     // TCPフィルタを設定
-    let filter = if let Some(port) = args.port {
-        format!("tcp and port {}", port)
-    } else {
-        "tcp".to_string()
-    };
+    let filter = "tcp".to_string();
     
     cap.filter(&filter, true)?;
     info!("フィルタを設定しました: {}", filter);
@@ -953,20 +614,25 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         ..Default::default()
     }));
     
-    let stats_clone = Arc::clone(&stats);
+    let stats_clone_for_stats = Arc::clone(&stats);
     let stats_interval = args.stats_interval;
+    let prometheus_port = args.prometheus_port;
+    
+    // Prometheusメトリクスサーバーの起動
+    let prometheus_stats = Arc::clone(&stats);
+    tokio::spawn(async move {
+        if let Err(e) = start_prometheus_server(prometheus_port, prometheus_stats).await {
+            warn!("Prometheusサーバーの起動に失敗しました: {}", e);
+        }
+    });
     
     // 統計表示用のタスク
-    let stats_task = tokio::spawn(async move {
+    let _stats_task = tokio::spawn(async move {
         let mut interval = tokio::time::interval(Duration::from_secs(stats_interval));
         
         loop {
             interval.tick().await;
-            
-            // 詳細分析を実行
-            perform_detailed_analysis(&stats_clone);
-            
-            print_statistics(&stats_clone);
+            print_statistics(&stats_clone_for_stats);
         }
     });
     
@@ -976,7 +642,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     loop {
         match cap.next_packet() {
             Ok(packet) => {
-                process_packet(packet.data, &stats, args.port, &args.interface);
+                process_packet(packet.data, &stats, &args.interface);
             }
             Err(pcap::Error::TimeoutExpired) => {
                 // タイムアウトは正常、続行
@@ -988,14 +654,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
         }
     }
-    
-    // Note: このループは無制限に実行されます (Ctrl+Cで停止)
-    // stats_task.abort(); は到達しません
-    
-    // 最終統計を表示 (実際には到達しません)
-    println!("\n=== 最終統計（グローバルIP間通信のみ） ===");
-    perform_detailed_analysis(&stats);
-    print_statistics(&stats);
     
     info!("監視を終了しました");
     Ok(())
