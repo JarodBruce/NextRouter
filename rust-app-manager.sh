@@ -32,7 +32,7 @@ error() {
 
 # 設定
 PROJECT_DIR="Network-Traffic-Monitor"
-DEFAULT_INTERFACE="lo"  # ローカルテスト用
+DEFAULT_INTERFACE="eth2"  # ローカルテスト用
 
 # 使用方法
 show_usage() {
@@ -70,8 +70,12 @@ check_project() {
 check_rust() {
     if ! command -v cargo >/dev/null 2>&1; then
         error "Rustがインストールされていません"
-        info "Rustをインストールしてください: sudo snap install rustup --classic"
-        exit 1
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+        
+        # 環境変数を設定
+        source "$HOME/.cargo/env"
+        
+        success "Rustをインストールしました"
     fi
     
     # デフォルトのRustツールチェーンが設定されているかチェック
