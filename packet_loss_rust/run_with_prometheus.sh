@@ -11,6 +11,10 @@ echo "利用可能なネットワークインターフェース:"
 ip link show | grep -E '^[0-9]+:' | awk '{print $2}' | sed 's/://'
 echo ""
 
+# 必要なパッケージのインストール
+sudo apt update
+sudo apt install libpcap-dev -y
+
 # デフォルトのインターフェースを取得
 DEFAULT_INTERFACE=$(ip route | grep default | awk '{print $5}' | head -n1)
 echo "デフォルトインターフェース: $DEFAULT_INTERFACE"
