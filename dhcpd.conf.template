@@ -1,0 +1,12 @@
+# Global DHCP configuration
+default-lease-time 600;
+max-lease-time 7200;
+authoritative;
+
+# Subnet configuration for LAN interface
+subnet LAN_NETWORK_ADDR netmask LAN_NETMASK {
+  range LAN_DHCP_START LAN_DHCP_END;
+  option routers LAN_GATEWAY;
+  option domain-name-servers 1.1.1.1;
+  option broadcast-address LAN_BROADCAST;
+}
