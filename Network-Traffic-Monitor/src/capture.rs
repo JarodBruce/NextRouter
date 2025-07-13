@@ -489,6 +489,7 @@ pub struct LocalIpCounters {
     pub rx_bytes: u64,
     pub last_tx_bytes: u64,
     pub last_rx_bytes: u64,
+    pub last_active: std::time::Instant,
 }
 
 impl LocalIpCounters {
@@ -498,6 +499,7 @@ impl LocalIpCounters {
             rx_bytes: 0,
             last_tx_bytes: 0,
             last_rx_bytes: 0,
+            last_active: std::time::Instant::now(),
         }
     }
 }
@@ -686,6 +688,7 @@ impl NetworkMetrics {
                     .entry(local_ip_str)
                     .or_insert_with(LocalIpCounters::new);
                 counters.tx_bytes += packet_info.size;
+                counters.last_active = std::time::Instant::now();
             } else if !src_is_local && dst_is_local {
                 // 外部からローカルIPへの受信
                 let local_ip_str = self.ip_to_string(dst_ip);
@@ -695,6 +698,7 @@ impl NetworkMetrics {
                     .entry(local_ip_str)
                     .or_insert_with(LocalIpCounters::new);
                 counters.rx_bytes += packet_info.size;
+                counters.last_active = std::time::Instant::now();
             }
         }
     }
@@ -718,6 +722,8 @@ impl NetworkMetrics {
         // 合計値計算用の変数
         let mut total_tx_bytes_rate = 0.0;
         let mut total_rx_bytes_rate = 0.0;
+        let mut inactive_ips = Vec::new();
+        const INACTIVITY_TIMEOUT: Duration = Duration::from_secs(300); // 5分
 
         // 各ローカルIPのレートを計算して更新
         for (local_ip, counters) in self.internal_counters_per_ip.iter_mut() {
@@ -752,6 +758,27 @@ impl NetworkMetrics {
                 format_bps(tx_bytes_rate * 8.0),
                 format_bps(rx_bytes_rate * 8.0)
             );
+
+            // 非アクティブなIPを検出
+            if now.duration_since(counters.last_active) > INACTIVITY_TIMEOUT {
+                inactive_ips.push(local_ip.clone());
+            }
+        }
+
+        // 非アクティブなIPを削除
+        for ip in inactive_ips {
+            info!("Removing inactive IP from metrics: {}", ip);
+
+            // メトリクスから削除
+            self.local_ip_tx_bytes_rate
+                .with_label_values(&[&ip])
+                .set(0.0);
+            self.local_ip_rx_bytes_rate
+                .with_label_values(&[&ip])
+                .set(0.0);
+
+            // 内部カウンタから削除
+            self.internal_counters_per_ip.remove(&ip);
         }
 
         // 合計値メトリクスを設定

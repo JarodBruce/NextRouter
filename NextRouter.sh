@@ -56,7 +56,7 @@ INTERFACE_2="$WAN1"     # WAN2 (second external network)
 INTERFACE_3="$LAN0"     # LAN (internal network)
 LAN_IP="$LANIP"         # LAN IP address
 
-sudo apt update && sudo apt install -y nftables isc-dhcp-server ipcalc
+sudo apt update && sudo apt install -y nftables isc-dhcp-server ipcalc libpcap-dev build-essential gcc
 
 LAN_NETWORK=$(ipcalc -n ${LAN_IP} | awk '/Network:/ {print $2}')
 echo "${LAN_NETWORK}"
@@ -283,7 +283,6 @@ error() {
     echo "✗ $1" >&2
 }
 
-sudo apt install -y build-essential gcc
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 source "$HOME/.cargo/env"
 success "Rustをインストールしました"
@@ -337,3 +336,50 @@ else
     sudo systemctl status network-traffic-monitor.service
 fi
 
+cd ../packet_loss_rust
+
+# TCP Window Monitor with Prometheus Metrics - 実行例
+
+echo "TCP Window Monitor with Prometheus Metrics"
+echo "=========================================="
+echo ""
+
+# リリースビルドが存在するか確認
+if [ ! -f "./target/release/tcp_window_monitor" ]; then
+    echo "リリースビルドが見つかりません。ビルドを実行します..."
+    cargo build --release
+fi
+
+# Create systemd service for packet loss monitor
+echo "Creating packet loss monitor service..."
+sudo tee /etc/systemd/system/packet-loss-monitor.service > /dev/null <<EOF
+[Unit]
+Description=Packet Loss Monitor with TCP Window Monitoring
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/home/ubuntu/NextRouter/packet_loss_rust
+ExecStart=/home/ubuntu/NextRouter/packet_loss_rust/target/release/tcp_window_monitor -i ${LAN0} -v
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# Enable and start the service
+sudo systemctl daemon-reload
+sudo systemctl enable packet-loss-monitor.service
+sudo systemctl start packet-loss-monitor.service
+
+success "Packet Loss Monitorサービスを登録・開始しました"
+
+# Check service status
+if sudo systemctl is-active --quiet packet-loss-monitor.service; then
+    success "Packet Loss Monitorサービスが正常に動作しています"
+else
+    error "Packet Loss Monitorサービスの開始に失敗しました"
+    sudo systemctl status packet-loss-monitor.service
+fi
