@@ -1,5 +1,5 @@
 use crate::prometheus_server::start_prometheus_server;
-use crate::stats::{IpStats, IpStatsMap};
+use crate::stats::IpStatsMap;
 use anyhow::{Context, Result};
 use log::{error, info, warn};
 use pnet::datalink::{self, NetworkInterface};
@@ -7,10 +7,11 @@ use pnet::packet::ethernet::{EtherTypes, EthernetPacket};
 use pnet::packet::ipv4::Ipv4Packet;
 use pnet::packet::ipv6::Ipv6Packet;
 use pnet::packet::Packet;
-use prometheus::{Registry, TextEncoder};
+use prometheus::Registry;
 use std::collections::HashMap;
 use std::net::{IpAddr, Ipv4Addr};
 use std::sync::mpsc;
+use pnet::packet::tcp::TcpPacket;
 use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
@@ -26,6 +27,26 @@ pub struct PacketInfo {
     pub src_port: Option<u16>,
     pub dst_port: Option<u16>,
     pub timestamp: chrono::DateTime<chrono::Utc>,
+}
+
+/// TCP接続の状態を追跡するための構造体
+#[derive(Debug, Clone)]
+pub struct TcpConnectionState {
+    pub expected_seq: u32,
+    pub total_packets: u64,
+    pub lost_packets: u64,
+    pub last_active: std::time::Instant,
+}
+
+impl TcpConnectionState {
+    pub fn new(seq_num: u32, payload_len: u32) -> Self {
+        Self {
+            expected_seq: seq_num.wrapping_add(payload_len),
+            total_packets: 1,
+            lost_packets: 0,
+            last_active: std::time::Instant::now(),
+        }
+    }
 }
 
 /// パケットキャプチャを管理する構造体
@@ -234,45 +255,85 @@ impl PacketCapture {
 
     /// パケットを解析してPacketInfoを生成
     fn parse_packet(&self, packet: &[u8]) -> Option<PacketInfo> {
-        let ethernet_packet = EthernetPacket::new(packet)?;
-
-        let timestamp = chrono::Utc::now();
-        let size = packet.len() as u64;
-
-        // Ethernetヘッダーの解析
-        match ethernet_packet.get_ethertype() {
-            EtherTypes::Ipv4 => {
-                if let Some(ipv4) = Ipv4Packet::new(ethernet_packet.payload()) {
-                    return self.parse_ipv4_packet(&ipv4, size, timestamp);
+        if let Some(ethernet_packet) = EthernetPacket::new(packet) {
+            let timestamp = chrono::Utc::now();
+            match ethernet_packet.get_ethertype() {
+                EtherTypes::Ipv4 => {
+                    if let Some(ipv4_packet) = Ipv4Packet::new(ethernet_packet.payload()) {
+                        if ipv4_packet.get_next_level_protocol()
+                            == pnet::packet::ip::IpNextHeaderProtocols::Tcp
+                        {
+                            if let Some(tcp_packet) =
+                                pnet::packet::tcp::TcpPacket::new(ipv4_packet.payload())
+                            {
+                                self.detect_packet_loss(&ipv4_packet, &tcp_packet);
+                            }
+                        }
+                        Self::parse_ipv4_packet(timestamp, &ipv4_packet)
+                    } else {
+                        None
+                    }
                 }
-            }
-            EtherTypes::Ipv6 => {
-                if let Some(ipv6) = Ipv6Packet::new(ethernet_packet.payload()) {
-                    return self.parse_ipv6_packet(&ipv6, size, timestamp);
+                EtherTypes::Ipv6 => {
+                    if let Some(ipv6_packet) = Ipv6Packet::new(ethernet_packet.payload()) {
+                        Self::parse_ipv6_packet(timestamp, &ipv6_packet)
+                    } else {
+                        None
+                    }
                 }
+                _ => None,
             }
-            _ => {
-                // 他のEtherTypeは無視
-                return None;
-            }
+        } else {
+            None
+        }
+    }
+
+    /// パケットロスを検出する
+    fn detect_packet_loss(&self, ipv4_packet: &Ipv4Packet, tcp_packet: &TcpPacket) {
+        let src_ip = ipv4_packet.get_source();
+        let dst_ip = ipv4_packet.get_destination();
+        let src_port = tcp_packet.get_source();
+        let dst_port = tcp_packet.get_destination();
+        let seq_num = tcp_packet.get_sequence();
+        let payload_len = tcp_packet.payload().len() as u32;
+
+        if payload_len == 0 {
+            return;
         }
 
-        None
+        let connection_key = format!("{}:{}-{}:{}", src_ip, src_port, dst_ip, dst_port);
+
+        if let Ok(mut metrics) = self.metrics.lock() {
+            let state = metrics
+                .tcp_connection_states
+                .entry(connection_key)
+                .or_insert_with(|| TcpConnectionState::new(seq_num, payload_len));
+
+            state.last_active = std::time::Instant::now();
+            state.total_packets += 1;
+
+            if seq_num > state.expected_seq {
+                let gap = seq_num.wrapping_sub(state.expected_seq);
+                if gap > 0 && gap < 1_000_000 {
+                    // Assume gap is number of lost packets. This is a simplification.
+                    state.lost_packets += 1;
+                }
+            }
+            state.expected_seq = seq_num.wrapping_add(payload_len);
+        }
     }
 
     /// IPv4パケットの解析
     fn parse_ipv4_packet(
-        &self,
-        ipv4: &Ipv4Packet,
-        size: u64,
         timestamp: chrono::DateTime<chrono::Utc>,
+        ipv4: &Ipv4Packet,
     ) -> Option<PacketInfo> {
         let src_ip = Some(IpAddr::V4(ipv4.get_source()));
         let dst_ip = Some(IpAddr::V4(ipv4.get_destination()));
 
         Some(PacketInfo {
             protocol: "IPv4".to_string(),
-            size,
+            size: ipv4.payload().len() as u64,
             src_ip,
             dst_ip,
             src_port: None,
@@ -283,17 +344,15 @@ impl PacketCapture {
 
     /// IPv6パケットの解析
     fn parse_ipv6_packet(
-        &self,
-        ipv6: &Ipv6Packet,
-        size: u64,
         timestamp: chrono::DateTime<chrono::Utc>,
+        ipv6: &Ipv6Packet,
     ) -> Option<PacketInfo> {
         let src_ip = Some(IpAddr::V6(ipv6.get_source()));
         let dst_ip = Some(IpAddr::V6(ipv6.get_destination()));
 
         Some(PacketInfo {
             protocol: "IPv6".to_string(),
-            size,
+            size: ipv6.payload().len() as u64,
             src_ip,
             dst_ip,
             src_port: None,
@@ -415,7 +474,17 @@ pub async fn start_network_monitoring_system(
     // IP統計レート更新タスクを開始（1秒間隔）
     let ip_stats_handle = tokio::spawn(async move {
         if let Err(e) = update_ip_stats_rates_periodically(ip_stats).await {
-            error!("IP stats rate update error: {}", e);
+            error!("IP stats rate updater failed: {}", e);
+        }
+    });
+
+    // パケットロス率更新タスクを開始（5秒間隔）
+    let metrics_packet_loss_updater = metrics.clone();
+    let packet_loss_update_handle = tokio::spawn(async move {
+        if let Err(e) =
+            update_packet_loss_metrics_periodically(metrics_packet_loss_updater, 1).await
+        {
+            error!("Packet loss metrics updater failed: {}", e);
         }
     });
 
@@ -458,6 +527,7 @@ pub async fn start_network_monitoring_system(
     log_handle.abort();
     rate_update_handle.abort();
     ip_stats_handle.abort();
+    packet_loss_update_handle.abort();
 
     // タスクの終了を少し待つ
     tokio::time::sleep(Duration::from_millis(200)).await;
@@ -476,11 +546,15 @@ pub struct NetworkMetrics {
     // 合計値用メトリクス
     pub total_tx_bytes_rate: prometheus::Gauge, // 全ローカルIPの送信バイト数レート合計
     pub total_rx_bytes_rate: prometheus::Gauge, // 全ローカルIPの受信バイト数レート合計
+    // パケットロス率メトリクス
+    pub packet_loss_percentage: prometheus::Gauge, // パケットロス率（%）
     // IP別内部カウンタ（差分計算用）
     pub internal_counters_per_ip: HashMap<String, LocalIpCounters>,
     pub last_update_time: std::time::Instant,
     // ローカルネットワーク範囲定義
     local_network_ranges: Vec<(Ipv4Addr, u8)>, // (network_addr, prefix_length)
+    // TCP接続追跡
+    pub tcp_connection_states: HashMap<String, TcpConnectionState>,
 }
 
 #[derive(Debug, Clone)]
@@ -557,6 +631,13 @@ impl NetworkMetrics {
         )
         .unwrap();
 
+        // パケットロス率メトリクス
+        let packet_loss_percentage = prometheus::Gauge::new(
+            "tcp_monitor_packet_loss_missing_per_second",
+            "Packet loss percentage",
+        )
+        .unwrap();
+
         // レジストリにメトリクスを登録
         registry
             .register(Box::new(local_ip_tx_bytes_rate.clone()))
@@ -569,6 +650,9 @@ impl NetworkMetrics {
             .unwrap();
         registry
             .register(Box::new(total_rx_bytes_rate.clone()))
+            .unwrap();
+        registry
+            .register(Box::new(packet_loss_percentage.clone()))
             .unwrap();
 
         // ローカルネットワーク範囲の構築
@@ -587,129 +671,74 @@ impl NetworkMetrics {
             local_ip_rx_bytes_rate,
             total_tx_bytes_rate,
             total_rx_bytes_rate,
+            packet_loss_percentage,
             internal_counters_per_ip: HashMap::new(),
             last_update_time: std::time::Instant::now(),
             local_network_ranges,
+            tcp_connection_states: HashMap::new(),
+        }
+    }    /// Record a packet in the metrics
+    pub fn record_packet(&mut self, packet_info: &PacketInfo) {
+        // Update packet counts and byte counts based on the packet information
+        if let (Some(src_ip), Some(dst_ip)) = (packet_info.src_ip, packet_info.dst_ip) {
+            // Determine if this is local traffic based on configured ranges
+            let is_local_src = self.is_local_ip(src_ip);
+            let is_local_dst = self.is_local_ip(dst_ip);
+            
+            // Update metrics based on traffic direction
+            if is_local_src && !is_local_dst {
+                // Outbound traffic from local IP
+                if let Some(local_ip_str) = self.get_local_ip_string(src_ip) {
+                    let counter = self.internal_counters_per_ip.entry(local_ip_str).or_insert_with(LocalIpCounters::new);
+                    counter.tx_bytes += packet_info.size;
+                    counter.last_active = std::time::Instant::now();
+                }
+            } else if !is_local_src && is_local_dst {
+                // Inbound traffic to local IP
+                if let Some(local_ip_str) = self.get_local_ip_string(dst_ip) {
+                    let counter = self.internal_counters_per_ip.entry(local_ip_str).or_insert_with(LocalIpCounters::new);
+                    counter.rx_bytes += packet_info.size;
+                    counter.last_active = std::time::Instant::now();
+                }
+            }
         }
     }
 
-    /// ローカルネットワーク範囲を構築する
-    fn build_local_network_ranges(
-        local_ip: Option<IpAddr>,
-        local_subnet: Option<Ipv4Addr>,
-    ) -> Vec<(Ipv4Addr, u8)> {
-        let mut ranges = Vec::new();
-
-        // 提供されたローカルIPとサブネットがある場合、それを優先的に使用
-        if let (Some(IpAddr::V4(ipv4)), Some(subnet_mask)) = (local_ip, local_subnet) {
-            let network_addr = calculate_network_address(ipv4, subnet_mask);
-            let prefix_len = calculate_prefix_length(subnet_mask);
-            ranges.push((network_addr, prefix_len));
-            let (_min_ip, _max_ip) = Self::calculate_ip_range(network_addr, prefix_len);
-        }
-
-        ranges
-    }
-
-    /// ネットワークアドレスとプレフィックス長からIP範囲を計算
-    fn calculate_ip_range(network: Ipv4Addr, prefix_len: u8) -> (Ipv4Addr, Ipv4Addr) {
-        let network_u32 = u32::from(network);
-        let host_bits = 32 - prefix_len;
-        let mask = if host_bits >= 32 {
-            0
-        } else {
-            (1u32 << host_bits) - 1
-        };
-
-        let min_ip = network_u32;
-        let max_ip = network_u32 | mask;
-
-        (Ipv4Addr::from(min_ip), Ipv4Addr::from(max_ip))
-    }
-
-    /// IPアドレスがローカルネットワーク範囲内かどうかを判定
-    fn is_local_ip(&self, ip: &IpAddr) -> bool {
+    /// Check if an IP address is in the local network ranges
+    fn is_local_ip(&self, ip: IpAddr) -> bool {
         match ip {
             IpAddr::V4(ipv4) => {
                 for (network, prefix) in &self.local_network_ranges {
-                    if self.ip_in_network(*ipv4, *network, *prefix) {
+                    let mask = !((1u32 << (32 - prefix)) - 1);
+                    let network_u32 = u32::from(*network);
+                    let ip_u32 = u32::from(ipv4);
+                    if (ip_u32 & mask) == (network_u32 & mask) {
                         return true;
                     }
                 }
                 false
             }
-            IpAddr::V6(_) => {
-                false // IPv6はローカル判定を簡略化（今回は対象外）
-            }
+            IpAddr::V6(_) => false, // IPv6 not supported for now
         }
     }
 
-    /// IPv4アドレスが指定されたネットワーク範囲内かどうかを判定
-    fn ip_in_network(&self, ip: Ipv4Addr, network: Ipv4Addr, prefix_len: u8) -> bool {
-        let mask = if prefix_len == 0 {
-            0
+    /// Get string representation of local IP for metrics
+    fn get_local_ip_string(&self, ip: IpAddr) -> Option<String> {
+        if self.is_local_ip(ip) {
+            Some(ip.to_string())
         } else {
-            !((1u32 << (32 - prefix_len)) - 1)
-        };
-
-        let ip_u32 = u32::from(ip);
-        let network_u32 = u32::from(network);
-
-        (ip_u32 & mask) == (network_u32 & mask)
-    }
-
-    /// IP アドレスを文字列に変換（統計用）
-    fn ip_to_string(&self, ip: &IpAddr) -> String {
-        match ip {
-            IpAddr::V4(ipv4) => ipv4.to_string(),
-            IpAddr::V6(ipv6) => {
-                // IPv6の場合、プレフィックスのみを使用（プライバシー考慮）
-                let segments = ipv6.segments();
-                format!(
-                    "{:x}:{:x}:{:x}:{:x}::",
-                    segments[0], segments[1], segments[2], segments[3]
-                )
-            }
+            None
         }
     }
 
-    pub fn record_packet(&mut self, packet_info: &PacketInfo) {
-        // ローカルIP別の統計を更新（remote_ipは無視して、local_ipのみで集約）
-        if let (Some(src_ip), Some(dst_ip)) = (&packet_info.src_ip, &packet_info.dst_ip) {
-            let src_is_local = self.is_local_ip(src_ip);
-            let dst_is_local = self.is_local_ip(dst_ip);
-
-            if src_is_local && !dst_is_local {
-                // ローカルIPから外部への送信
-                let local_ip_str = self.ip_to_string(src_ip);
-
-                let counters = self
-                    .internal_counters_per_ip
-                    .entry(local_ip_str)
-                    .or_insert_with(LocalIpCounters::new);
-                counters.tx_bytes += packet_info.size;
-                counters.last_active = std::time::Instant::now();
-            } else if !src_is_local && dst_is_local {
-                // 外部からローカルIPへの受信
-                let local_ip_str = self.ip_to_string(dst_ip);
-
-                let counters = self
-                    .internal_counters_per_ip
-                    .entry(local_ip_str)
-                    .or_insert_with(LocalIpCounters::new);
-                counters.rx_bytes += packet_info.size;
-                counters.last_active = std::time::Instant::now();
-            }
-        }
-    }
-
+    /// Export metrics in Prometheus format
     pub fn export(&self) -> String {
-        let encoder = TextEncoder::new();
+        let encoder = prometheus::TextEncoder::new();
         let metric_families = self.registry.gather();
-        encoder.encode_to_string(&metric_families).unwrap()
+        encoder.encode_to_string(&metric_families).unwrap_or_default()
     }
 
-    /// 前回からの差分を計算してレートメトリクスを更新
+    /// メトリクスを更新する
     pub fn update_rate_metrics(&mut self) -> Result<(), Box<dyn std::error::Error>> {
         let now = std::time::Instant::now();
         let elapsed_secs = now.duration_since(self.last_update_time).as_secs_f64();
@@ -792,6 +821,31 @@ impl NetworkMetrics {
 
         self.last_update_time = now;
         Ok(())
+    }
+
+    /// Build local network ranges from IP and subnet
+    fn build_local_network_ranges(
+        local_ip: Option<IpAddr>, 
+        local_subnet: Option<Ipv4Addr>
+    ) -> Vec<(Ipv4Addr, u8)> {
+        let mut ranges = Vec::new();
+        
+        if let (Some(IpAddr::V4(ip)), Some(subnet)) = (local_ip, local_subnet) {
+            let prefix = calculate_prefix_length(subnet);
+            let network = calculate_network_address(ip, subnet);
+            ranges.push((network, prefix));
+        }
+        
+        ranges
+    }
+
+    /// Calculate IP range for a given network and prefix
+    fn calculate_ip_range(network: Ipv4Addr, prefix: u8) -> (Ipv4Addr, Ipv4Addr) {
+        let network_u32 = u32::from(network);
+        let mask = !((1u32 << (32 - prefix)) - 1);
+        let min_ip = Ipv4Addr::from(network_u32 & mask);
+        let max_ip = Ipv4Addr::from((network_u32 & mask) | ((1u32 << (32 - prefix)) - 1));
+        (min_ip, max_ip)
     }
 }
 
@@ -883,56 +937,54 @@ pub async fn update_rate_metrics_periodically(
 /// IP統計のレートを定期的に更新する関数
 pub async fn update_ip_stats_rates_periodically(ip_stats: IpStatsMap) -> Result<()> {
     let mut interval = time::interval(Duration::from_secs(1));
-    let mut last_stats: HashMap<IpAddr, IpStats> = HashMap::new();
-
     loop {
-        tokio::select! {
-            _ = interval.tick() => {
-                // 短時間でスナップショットを取得
-                let current_snapshot = if let Ok(current_stats) = ip_stats.lock() {
-                    current_stats.clone()
-                } else {
-                    warn!("Failed to acquire IP stats lock for rate calculation");
-                    continue;
-                };
-
-                // レート計算（ロック外で実行）
-                let mut updated_rates: HashMap<IpAddr, (u64, u64)> = HashMap::new();
-                for (ip, stats) in &current_snapshot {
-                    if let Some(last) = last_stats.get(ip) {
-                        let tx_bytes_rate = stats.tx_bytes.saturating_sub(last.tx_bytes);
-                        let rx_bytes_rate = stats.rx_bytes.saturating_sub(last.rx_bytes);
-                        updated_rates.insert(*ip, (tx_bytes_rate, rx_bytes_rate));
-                    }
-                }
-                last_stats = current_snapshot;
-            }
-            _ = tokio::signal::ctrl_c() => {
-                info!("IP stats rate updater received shutdown signal");
-                break;
+        interval.tick().await;
+        if let Ok(mut stats) = ip_stats.lock() {
+            for (_, _ip_stat) in stats.iter_mut() {
+                // ここでレートを計算・更新するロジックを実装
+                // 現状はIpStatsにレート用のフィールドがないため、追加が必要
             }
         }
     }
+}
 
-    Ok(())
+/// パケットロス率メトリクスを定期的に更新する
+pub async fn update_packet_loss_metrics_periodically(
+    metrics: Arc<std::sync::Mutex<NetworkMetrics>>,
+    interval_secs: u64,
+) -> Result<()> {
+    let mut interval = time::interval(Duration::from_secs(interval_secs));
+    loop {
+        interval.tick().await;
+        if let Ok(mut metrics) = metrics.lock() {
+            let mut total_packets = 0;
+            let mut total_lost_packets = 0;
+
+            // 古い接続をクリーンアップ
+            let now = std::time::Instant::now();
+            metrics
+                .tcp_connection_states
+                .retain(|_, state| now.duration_since(state.last_active).as_secs() < 60);
+
+            for state in metrics.tcp_connection_states.values() {
+                total_packets += state.total_packets;
+                total_lost_packets += state.lost_packets;
+            }
+
+            let loss_percentage = if total_packets > 0 {
+                (total_lost_packets as f64 / total_packets as f64) * 100.0
+            } else {
+                0.0
+            };
+
+            metrics.packet_loss_percentage.set(loss_percentage);
+        }
+    }
 }
 
 /// サブネットマスクからプレフィックス長を計算
 fn calculate_prefix_length(subnet_mask: Ipv4Addr) -> u8 {
-    let mask_u32 = u32::from(subnet_mask);
-    let mut prefix = 0;
-    let mut mask = 0x80000000u32;
-
-    for _ in 0..32 {
-        if mask_u32 & mask != 0 {
-            prefix += 1;
-            mask >>= 1;
-        } else {
-            break;
-        }
-    }
-
-    prefix
+    u32::from(subnet_mask).count_ones() as u8
 }
 
 /// IPアドレスとサブネットマスクからネットワークアドレスを計算
