@@ -78,7 +78,7 @@ main() {
 
     echo
     success "All setup tasks completed successfully!"
-    info "Prometheus is accessible at http://<your-server-ip>:9090"
+    info "Prometheus is accessible at http://${LAN_IP}:9090"
 }
 
 # Run main function with error handling
